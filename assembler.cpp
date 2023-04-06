@@ -1,131 +1,61 @@
-#include <iostream>
-#include <sstream>
-#include <algorithm>
-#include "map"
-#include "string"
-#include "vector"
-#include "iterator"
-#include "bitset"
+#include "assembler.h"
 
 using namespace std;
 
-// 寄存器
-class Register {
-public:
-    int number;
-    string name;
-    bitset<32> value;
-
-    Register(int number, const string &name, const bitset<32> &value) : number(number), name(name), value(value) {}
-
-    void Reset(int number, string name) {
-        this->number = number;
-        this->name = name;
-    }
-};
-
-class Instruction {
-public:
-    bitset<32> address;// 指令地址
-    vector<string> assemblecode;// 汇编代码（按空格分割成数组并去掉逗号）
-    bitset<32> machinecode;//机器码
-    Instruction(const bitset<32> &address, const vector<string> &assemblecode, const bitset<32> &machinecode) : address(
-            address), assemblecode(assemblecode), machinecode(machinecode) {};
-};
+extern vector<Register> registers;
+const unsigned int StartAddress = 0x00400000;  // 0x00400000,指令的初始地址
 
 // 记录指令数量
 unsigned int Count = 0;
-const unsigned int StartAddress = 4194304;//0x00400000,指令的初始地址
 // 要处理的所有指令
 string allinstructions[] = {"add", "addi", "sub",
                             "and", "or", "sll",
                             "j", "jr", "lw",
                             "sw", "beq"};
 
-vector<Register> registers;
 vector<Instruction> instructions;
 vector<pair<bitset<32>, string>> Lables;//标签库，存储标签的地址及字符串
 
-void InitRegister();//初始化寄存器
 // 读取汇编码并按空格分隔成vector<string>并去除逗号，
 // 如果第一个子字符串不是要处理的指令码，判断其为标签，去除并加入标签库，处理后的结果插入Instruction
 void InputInsToMap();
 
 void Compilation();//汇编的主要程序
-void Add(vector<string> code, unsigned int i);
 
-void Addi(vector<string> code, unsigned int i);
+static void Add(vector<string> code, unsigned int i);
 
-void Sub(vector<string> code, unsigned int i);
+static void Addi(vector<string> code, unsigned int i);
 
-void Sll(vector<string> code, unsigned int i);
+static void Sub(vector<string> code, unsigned int i);
 
-void And(vector<string> code, unsigned int i);
+static void Sll(vector<string> code, unsigned int i);
 
-void Or(vector<string> code, unsigned int i);
+static void And(vector<string> code, unsigned int i);
 
-void J(vector<string> code, unsigned int i);
+static void Or(vector<string> code, unsigned int i);
 
-void Jr(vector<string> code, unsigned int i);
+static void J(vector<string> code, unsigned int i);
 
-void Lw(vector<string> code, unsigned int i);
+static void Jr(vector<string> code, unsigned int i);
 
-void Sw(vector<string> code, unsigned int i);
+static void Lw(vector<string> code, unsigned int i);
 
-void Beq(vector<string> code, unsigned int i);
+static void Sw(vector<string> code, unsigned int i);
+
+static void Beq(vector<string> code, unsigned int i);
 
 void PrintBinaryAddress();
 
 void PrintHexAddress();
 
-int main() {
-    InitRegister();// 初始化寄存器
-    InputInsToMap();
-    Compilation();
-    PrintBinaryAddress();
-    //PrintHexAddress();
-    return 0;
-}
-
-void InitRegister() {
-    bitset<32> b(0);
-    Register temp(0, "$zero", b);
-    registers.push_back(temp);// 插入$zero
-    temp.Reset(1, "at");
-    registers.push_back(temp);// 插入$at
-    temp.Reset(2, "$v0");
-    registers.push_back(temp);// 插入$v0
-    temp.Reset(3, "$v1");
-    registers.push_back(temp);// 插入$v1
-    for (int i = 4; i < 8; i++) {
-        temp.Reset(i, "$a" + to_string(i - 4));
-        registers.push_back(temp);;// 插入$a
-    }
-    for (int i = 8; i < 16; i++) {
-        temp.Reset(i, "$t" + to_string(i - 8));
-        registers.push_back(temp);;// 插入$t
-    }
-    for (int i = 16; i < 24; i++) {
-        temp.Reset(i, "$s" + to_string(i - 16));
-        registers.push_back(temp);;// 插入$s
-    }
-    for (int i = 24; i < 26; i++) {
-        temp.Reset(i, "$t" + to_string(i - 16));
-        registers.push_back(temp);;// 插入$t
-    }
-    for (int i = 26; i < 28; i++) {
-        temp.Reset(i, "$k" + to_string(i - 26));
-        registers.push_back(temp);;// 插入$k
-    }
-    temp.Reset(28, "$gp");
-    registers.push_back(temp);;// 插入$gp
-    temp.Reset(29, "$sp");
-    registers.push_back(temp);;// 插入$sp
-    temp.Reset(30, "$fp");
-    registers.push_back(temp);;// 插入$fp
-    temp.Reset(31, "$ra");
-    registers.push_back(temp);;// 插入$ra
-}
+// int main() {
+//     InitRegister();// 初始化寄存器
+//     InputInsToMap();
+//     Compilation();
+//     PrintBinaryAddress();
+//     //PrintHexAddress();
+//     return 0;
+// }
 
 // 读取汇编码并按空格分隔成vector<string>并去除逗号，处理标签
 void InputInsToMap() {
@@ -207,7 +137,7 @@ void Compilation() {
 }
 
 // 根据寄存器名字找到编号
-int FindNumByName(const string &name) {
+static int FindNumByName(const string &name) {
     for (auto &i: registers) {
         if (i.name == name)
             return i.number;
@@ -216,7 +146,7 @@ int FindNumByName(const string &name) {
 }
 
 // 根据寄存器名字找到值
-bitset<32> FindValueByName(const string &name) {
+static bitset<32> FindValueByName(const string &name) {
     for (auto &i: registers) {
         if (i.name == name)
             return i.value;
@@ -225,7 +155,7 @@ bitset<32> FindValueByName(const string &name) {
 }
 
 // 根据标签名找到对应的地址
-bitset<32> FindAddressByName(const string &name) {
+static bitset<32> FindAddressByName(const string &name) {
     for (auto &i: Lables) {
         if (i.second == name)
             return i.first;
@@ -234,7 +164,7 @@ bitset<32> FindAddressByName(const string &name) {
 }
 
 //add rd, rs, rt
-void Add(vector<string> code, unsigned int i) {
+static void Add(vector<string> code, unsigned int i) {
     int rd = FindNumByName(code.at(1));
     int rs = FindNumByName(code.at(2));
     int rt = FindNumByName(code.at(3));
@@ -243,7 +173,7 @@ void Add(vector<string> code, unsigned int i) {
     instructions.at(i).machinecode = result;
 }
 
-void Addi(vector<string> code, unsigned int i) {
+static void Addi(vector<string> code, unsigned int i) {
     int rt = FindNumByName(code.at(1));
     int rs = FindNumByName(code.at(2));
     int imm = stoi(code.at(3));
@@ -258,7 +188,7 @@ void Addi(vector<string> code, unsigned int i) {
     instructions.at(i).machinecode = result;
 }
 
-void Sub(vector<string> code, unsigned int i) {
+static void Sub(vector<string> code, unsigned int i) {
     int rd = FindNumByName(code.at(1));
     int rs = FindNumByName(code.at(2));
     int rt = FindNumByName(code.at(3));
@@ -267,7 +197,7 @@ void Sub(vector<string> code, unsigned int i) {
     instructions.at(i).machinecode = result;
 }
 
-void Sll(vector<string> code, unsigned int i) {
+static void Sll(vector<string> code, unsigned int i) {
     int rd = FindNumByName(code.at(1));
     int rt = FindNumByName(code.at(2));
     int shame = stoi(code.at(3));
@@ -276,7 +206,7 @@ void Sll(vector<string> code, unsigned int i) {
     instructions.at(i).machinecode = result;
 }
 
-void And(vector<string> code, unsigned int i) {
+static void And(vector<string> code, unsigned int i) {
     int rd = FindNumByName(code.at(1));
     int rs = FindNumByName(code.at(2));
     int rt = FindNumByName(code.at(3));
@@ -285,7 +215,7 @@ void And(vector<string> code, unsigned int i) {
     instructions.at(i).machinecode = result;
 }
 
-void Or(vector<string> code, unsigned int i) {
+static void Or(vector<string> code, unsigned int i) {
     int rd = FindNumByName(code.at(1));
     int rs = FindNumByName(code.at(2));
     int rt = FindNumByName(code.at(3));
@@ -294,7 +224,7 @@ void Or(vector<string> code, unsigned int i) {
     instructions.at(i).machinecode = result;
 }
 
-void J(vector<string> code, unsigned int i) {
+static void J(vector<string> code, unsigned int i) {
     bitset<32> address = FindAddressByName(code.at(1));// 二进制的标签地址
     // 如果指令后的地址是用标签表示的,address不会为null
     if (address == NULL) {// 十进制地址值跳转
@@ -306,7 +236,7 @@ void J(vector<string> code, unsigned int i) {
     instructions.at(i).machinecode = bitset<32>(result);
 }
 
-void Jr(vector<string> code, unsigned int i) {
+static void Jr(vector<string> code, unsigned int i) {
     int rs = FindNumByName(code.at(1));
     unsigned int decimal = 8 + rs * 2097152;
     bitset<32> result(decimal);// 二进制的机器码
@@ -314,7 +244,7 @@ void Jr(vector<string> code, unsigned int i) {
 }
 
 //lw $t0, 0($t1)
-void Lw(vector<string> code, unsigned int i) {
+static void Lw(vector<string> code, unsigned int i) {
     int rt = FindNumByName(code.at(1));
     int startpos = code.at(2).find_first_of('(');// 找出第一个左括号的位置，进而分理出rs
     int endpos = code.at(2).find_last_of(')');// 找出第一个左括号的位置，进而分理出rs
@@ -331,7 +261,7 @@ void Lw(vector<string> code, unsigned int i) {
     instructions.at(i).machinecode = bitset<32>(result);
 }
 
-void Sw(vector<string> code, unsigned int i) {
+static void Sw(vector<string> code, unsigned int i) {
     int rt = FindNumByName(code.at(1));
     int startpos = code.at(2).find_first_of('(');// 找出第一个左括号的位置，进而分理出rs
     int endpos = code.at(2).find_last_of(')');// 找出第一个左括号的位置，进而分理出rs
@@ -348,7 +278,7 @@ void Sw(vector<string> code, unsigned int i) {
     instructions.at(i).machinecode = bitset<32>(result);
 }
 
-void Beq(vector<string> code, unsigned int i) {
+static void Beq(vector<string> code, unsigned int i) {
     int rs = FindNumByName(code.at(1));
     int rt = FindNumByName(code.at(2));
     bitset<32> label = FindAddressByName(code.at(3));// 标签对应的二进制地址值
