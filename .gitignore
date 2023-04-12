@@ -3,6 +3,7 @@
 /build/
 /.vscode/
 Mars4*
+/.idea/
 
 # Prerequisites
 *.d

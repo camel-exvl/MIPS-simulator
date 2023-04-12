@@ -16,12 +16,6 @@ string allinstructions[] = {"add", "addi", "sub",
 vector<Instruction> instructions;
 vector<pair<bitset<32>, string>> Lables;//标签库，存储标签的地址及字符串
 
-// 读取汇编码并按空格分隔成vector<string>并去除逗号，
-// 如果第一个子字符串不是要处理的指令码，判断其为标签，去除并加入标签库，处理后的结果插入Instruction
-void InputInsToMap();
-
-void Compilation();//汇编的主要程序
-
 static void Add(vector<string> code, unsigned int i);
 
 static void Addi(vector<string> code, unsigned int i);
@@ -43,10 +37,6 @@ static void Lw(vector<string> code, unsigned int i);
 static void Sw(vector<string> code, unsigned int i);
 
 static void Beq(vector<string> code, unsigned int i);
-
-void PrintBinaryAddress();
-
-void PrintHexAddress();
 
 // int main() {
 //     InitRegister();// 初始化寄存器
