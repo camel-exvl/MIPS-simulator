@@ -1,5 +1,6 @@
 #include "main.h"
 #include "assembler.h"
+#include "disassembler.h"
 
 using namespace std;
 
@@ -10,9 +11,16 @@ static void InitRegister();  // 初始化寄存器
 
 int main() {
     InitRegister();
+    // 汇编器
     InputInsToMap();
     Compilation();
     PrintBinaryAddress();
+
+    // 反汇编器
+    vector<string> res = disassembler("0000100000010000000000000000000100100001001010001111111110011100");
+    for (auto &i : res) {
+        cout << i << endl;
+    }
     return 0;
 }
 
