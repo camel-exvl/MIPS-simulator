@@ -30,7 +30,7 @@ vector<string> disassembler(string s) {
         int op = stoi(s.substr(insCount * 32, 6), nullptr, 2);
         if (op == 0) {
             instructions.push_back(instructionRType(s.substr(insCount * 32, 32)));
-        } else if (op >> 1 & 1 || op >> 4 & 1) {
+        } else if (op >> 1 == 1 || op >> 2 == 0b100) {
             instructions.push_back(instructionJType(s.substr(insCount * 32, 32), insCount));
         } else {
             instructions.push_back(instructionIType(s.substr(insCount * 32, 32), insCount));
@@ -74,15 +74,13 @@ static string instructionIType(const string machineCode, const unsigned int insC
     int rt = stoi(machineCode.substr(11, 5), nullptr, 2);
     bitset<16> immediate(machineCode.substr(16, 16));
     int imm = complement2int(immediate);
-    int PC = 0x00400000 + (insCount << 2);
     string instruction;
     if (op == 0x0f) {  // lui
         instruction = opDic.at(op) + " " + findNameByNum(rt) + ", " + to_string(imm);
     } else if (op == 0x04 || op == 0x05) {  // beq, bne
-        instruction =
-            opDic.at(op) + " " + findNameByNum(rs) + ", " + findNameByNum(rt) + ", " + to_string(PC + 4 + (imm << 2));
+        instruction = opDic.at(op) + " " + findNameByNum(rs) + ", " + findNameByNum(rt) + ", " + to_string(imm);
     } else if (op == 0x06 || op == 0x07) {  // blez, bgtz
-        instruction = opDic.at(op) + " " + findNameByNum(rs) + ", " + to_string(PC + 4 + (imm << 2));
+        instruction = opDic.at(op) + " " + findNameByNum(rs) + ", " + to_string(imm);
     } else if (op == 0x20 || op == 0x21 || op == 0x23 || op == 0x24 || op == 0x25) {  // lb, lh, lw, lbu, lhu
         instruction = opDic.at(op) + " " + findNameByNum(rt) + ", " + to_string(imm) + "(" + findNameByNum(rs) + ")";
     } else if (op == 0x28 || op == 0x29 || op == 0x2B) {  // sb, sh, sw
