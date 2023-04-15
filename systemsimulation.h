@@ -1,20 +1,15 @@
 #pragma once
-#include<iostream>
-#include<vector>
-#include<map>
-#include<utility>
-#include<string>
-#include<bitset>
-#include<cstdlib>
+#include"main.h"
 
 //寄存器
 class Register
 {
-public:
+private:
     int number;//编号
     std::string name;//名称
     std::bitset<32> value;//存储内容
 
+public:
     //默认构造函数
     Register() : number{ -1 } {}
 
@@ -24,40 +19,37 @@ public:
     //含参构造函数，接受右值
     Register(int number, std::string&& name, std::bitset<32>&& value) : number{ number }, name{ std::move(name) }, value{ std::move(value) } {}
 
-    //重新设置寄存器
-    void Reset(int number, const std::string& name)
-    {
-        this->number = number;
-        this->name = name;
-    }
+    friend class System;
 };
 
 //内存
 class Memory
 {
-public:
+private:
     //内存以map<地址,存储内容>的映射来模拟
     std::map<unsigned long, std::bitset<32>> text_segment;//代码段，储存代码，地址从0x00400000开始往上增长
     std::map<unsigned long, std::bitset<32>> data_segment;//数据段，储存静态数据，地址从0x10000000开始往上增长
     std::map<unsigned long, std::bitset<32>> stack_segment;//堆栈段，地址从0x7ffffffc开始往下递减
+    std::bitset<32> texttop;//指向代码段的空内存的最小地址
 
-    //指向代码段的空内存的最小地址
-    std::bitset<32> texttop;
-
+public:
     //默认构造函数，初始化内存地址
     Memory() :text_segment{ make_pair(0x00400000,std::bitset<32>{}) },
         data_segment{ make_pair(0x10000000,std::bitset<32>{}) },
         stack_segment{ make_pair(0x7ffffffc,std::bitset<32>{}) }, texttop{ 0x00400000 } {};
+
+    friend class System;
 };
 
 //系统
 class System
 {
-public:
+private:
     Memory mem;//内存
     std::vector<Register> registers{ 32 };//寄存器组
     Register PC;//程序计数器
 
+public:
     //默认构造函数
     System()
     {
