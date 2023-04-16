@@ -15,13 +15,12 @@ static const map<int, string> opDic = {{0x04, "beq"},   {0x05, "bne"},  {0x06, "
                                        {0x24, "lbu"},   {0x25, "lhu"},  {0x28, "sb"},    {0x29, "sh"},   {0x2B, "sw"},
                                        {0x02, "j"},     {0x03, "jal"}};
 
-inline static string findNameByNum(const unsigned int num);  // 根据寄存器编号查找寄存器名称
-static string instructionRType(const string machineCode);    // 处理R型指令
-static string instructionIType(const string machineCode, const unsigned int insCount);  // 处理I型指令
-static string instructionJType(const string machineCode, const unsigned int insCount);  // 处理J型指令
-inline static int complement2int(const bitset<16> complement);                          // 补码转换为int
+static string instructionRType(System& sys, const string machineCode);                               // 处理R型指令
+static string instructionIType(System& sys, const string machineCode, const unsigned int insCount);  // 处理I型指令
+static string instructionJType(System& sys, const string machineCode, const unsigned int insCount);  // 处理J型指令
+inline static int complement2int(const bitset<16> complement);  // 补码转换为int
 
-vector<string> disassembler(string s) {
+vector<string> disassembler(System& sys, string s) {
     if (s.length() % 32) {
         throw "Error: The length of the binary code is not a multiple of 32.";
     }
@@ -29,23 +28,21 @@ vector<string> disassembler(string s) {
     for (int insCount = 0, n = s.length() / 32; insCount < n; insCount++) {
         int op = stoi(s.substr(insCount * 32, 6), nullptr, 2);
         if (op == 0) {
-            instructions.push_back(instructionRType(s.substr(insCount * 32, 32)));
+            instructions.push_back(instructionRType(sys, s.substr(insCount * 32, 32)));
         } else if (op >> 1 == 1 || op >> 2 == 0b100) {
-            instructions.push_back(instructionJType(s.substr(insCount * 32, 32), insCount));
+            instructions.push_back(instructionJType(sys, s.substr(insCount * 32, 32), insCount));
         } else {
-            instructions.push_back(instructionIType(s.substr(insCount * 32, 32), insCount));
+            instructions.push_back(instructionIType(sys, s.substr(insCount * 32, 32), insCount));
         }
     }
     return instructions;
 }
 
-inline static string findNameByNum(const unsigned int num) { return registers[num].name; }
-
 inline static int complement2int(const bitset<16> complement) {
     return complement[15] ? -((~complement).to_ulong() + 1) : complement.to_ulong();
 }
 
-static string instructionRType(const string machineCode) {
+static string instructionRType(System& sys, const string machineCode) {
     int rs = stoi(machineCode.substr(6, 5), nullptr, 2);
     int rt = stoi(machineCode.substr(11, 5), nullptr, 2);
     int rd = stoi(machineCode.substr(16, 5), nullptr, 2);
@@ -53,22 +50,23 @@ static string instructionRType(const string machineCode) {
     int funct = stoi(machineCode.substr(26, 6), nullptr, 2);
     string instruction;
     if (funct == 0x1a || funct == 0x1b || funct == 0x18 || funct == 0x19) {  // div, divu, mult, multu
-        instruction = functDic.at(funct) + " " + findNameByNum(rs) + ", " + findNameByNum(rt);
+        instruction = functDic.at(funct) + " " + sys.FindRegister(rs).GetName() + ", " + sys.FindRegister(rt).GetName();
     } else if (funct == 0x00 || funct == 0x02 || funct == 0x03) {  // sll, srl, sra
-        instruction = functDic.at(funct) + " " + findNameByNum(rd) + ", " + findNameByNum(rt) + ", " + to_string(shamt);
+        instruction = functDic.at(funct) + " " + sys.FindRegister(rd).GetName() + ", " +
+                      sys.FindRegister(rt).GetName() + ", " + to_string(shamt);
     } else if (funct == 0x08 || funct == 0x11 || funct == 0x13) {  // jr, mthi, mtlo
-        instruction = functDic.at(funct) + " " + findNameByNum(rs);
+        instruction = functDic.at(funct) + " " + sys.FindRegister(rs).GetName();
     } else if (funct == 0x09) {  // jalr
-        instruction = functDic.at(funct) + " " + findNameByNum(rs) + ", " + findNameByNum(rd);
+        instruction = functDic.at(funct) + " " + sys.FindRegister(rs).GetName() + ", " + sys.FindRegister(rd).GetName();
     } else if (funct == 0x10 || funct == 0x12) {  // mfhi, mflo
-        instruction = functDic.at(funct) + " " + findNameByNum(rd);
+        instruction = functDic.at(funct) + " " + sys.FindRegister(rd).GetName();
     } else {  // add, addu, sub, subu, and, or, xor, nor, slt, sltu
-        instruction =
-            functDic.at(funct) + " " + findNameByNum(rd) + ", " + findNameByNum(rs) + ", " + findNameByNum(rt);
+        instruction = functDic.at(funct) + " " + sys.FindRegister(rd).GetName() + ", " +
+                      sys.FindRegister(rs).GetName() + ", " + sys.FindRegister(rt).GetName();
     }
     return instruction;
 }
-static string instructionIType(const string machineCode, const unsigned int insCount) {
+static string instructionIType(System& sys, const string machineCode, const unsigned int insCount) {
     int op = stoi(machineCode.substr(0, 6), nullptr, 2);
     int rs = stoi(machineCode.substr(6, 5), nullptr, 2);
     int rt = stoi(machineCode.substr(11, 5), nullptr, 2);
@@ -76,22 +74,26 @@ static string instructionIType(const string machineCode, const unsigned int insC
     int imm = complement2int(immediate);
     string instruction;
     if (op == 0x0f) {  // lui
-        instruction = opDic.at(op) + " " + findNameByNum(rt) + ", " + to_string(imm);
+        instruction = opDic.at(op) + " " + sys.FindRegister(rt).GetName() + ", " + to_string(imm);
     } else if (op == 0x04 || op == 0x05) {  // beq, bne
-        instruction = opDic.at(op) + " " + findNameByNum(rs) + ", " + findNameByNum(rt) + ", " + to_string(imm);
+        instruction = opDic.at(op) + " " + sys.FindRegister(rs).GetName() + ", " + sys.FindRegister(rt).GetName() +
+                      ", " + to_string(imm);
     } else if (op == 0x06 || op == 0x07) {  // blez, bgtz
-        instruction = opDic.at(op) + " " + findNameByNum(rs) + ", " + to_string(imm);
+        instruction = opDic.at(op) + " " + sys.FindRegister(rs).GetName() + ", " + to_string(imm);
     } else if (op == 0x20 || op == 0x21 || op == 0x23 || op == 0x24 || op == 0x25) {  // lb, lh, lw, lbu, lhu
-        instruction = opDic.at(op) + " " + findNameByNum(rt) + ", " + to_string(imm) + "(" + findNameByNum(rs) + ")";
+        instruction = opDic.at(op) + " " + sys.FindRegister(rt).GetName() + ", " + to_string(imm) + "(" +
+                      sys.FindRegister(rs).GetName() + ")";
     } else if (op == 0x28 || op == 0x29 || op == 0x2B) {  // sb, sh, sw
-        instruction = opDic.at(op) + " " + findNameByNum(rt) + ", " + to_string(imm) + "(" + findNameByNum(rs) + ")";
+        instruction = opDic.at(op) + " " + sys.FindRegister(rt).GetName() + ", " + to_string(imm) + "(" +
+                      sys.FindRegister(rs).GetName() + ")";
     } else {  // addi, addiu, slti, sltiu, andi, ori, xori
-        instruction = opDic.at(op) + " " + findNameByNum(rt) + ", " + findNameByNum(rs) + ", " + to_string(imm);
+        instruction = opDic.at(op) + " " + sys.FindRegister(rt).GetName() + ", " + sys.FindRegister(rs).GetName() +
+                      ", " + to_string(imm);
     }
     return instruction;
 }
 
-static string instructionJType(const string machineCode, const unsigned int insCount) {
+static string instructionJType(System& sys, const string machineCode, const unsigned int insCount) {
     int op = stoi(machineCode.substr(0, 6), nullptr, 2);
     int addr = stoi(machineCode.substr(6, 26), nullptr, 2);
     int PC = 0x00400000 + (insCount << 2);
