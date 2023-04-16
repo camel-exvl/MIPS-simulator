@@ -16,26 +16,37 @@ static const map<int, string> opDic = {{0x04, "beq"},   {0x05, "bne"},  {0x06, "
                                        {0x02, "j"},     {0x03, "jal"}};
 
 static string instructionRType(System& sys, const string machineCode);                               // 处理R型指令
-static string instructionIType(System& sys, const string machineCode, const unsigned int insCount);  // 处理I型指令
+static string instructionIType(System& sys, const string machineCode);                               // 处理I型指令
 static string instructionJType(System& sys, const string machineCode, const unsigned int insCount);  // 处理J型指令
 inline static int complement2int(const bitset<16> complement);  // 补码转换为int
 
-vector<string> disassembler(System& sys, string s) {
-    if (s.length() % 32) {
-        throw "Error: The length of the binary code is not a multiple of 32.";
-    }
+vector<string> disassembler(System& sys, vector<bitset<32>> s) {
     vector<string> instructions;
-    for (int insCount = 0, n = s.length() / 32; insCount < n; insCount++) {
-        int op = stoi(s.substr(insCount * 32, 6), nullptr, 2);
+    for (int i = 0; i < s.size(); i++) {
+        int op = s[i].to_ulong() >> 26;
         if (op == 0) {
-            instructions.push_back(instructionRType(sys, s.substr(insCount * 32, 32)));
+            instructions.push_back(instructionRType(sys, s[i].to_string()));
         } else if (op >> 1 == 1 || op >> 2 == 0b100) {
-            instructions.push_back(instructionJType(sys, s.substr(insCount * 32, 32), insCount));
+            instructions.push_back(instructionJType(sys, s[i].to_string(), i));
         } else {
-            instructions.push_back(instructionIType(sys, s.substr(insCount * 32, 32), insCount));
+            instructions.push_back(instructionIType(sys, s[i].to_string()));
         }
     }
     return instructions;
+}
+
+vector<string> disassemblerOpenFile(System& sys, const string& fileName) {
+    ifstream fin(fileName, ios::binary);
+    if (!fin) {
+        throw "Error: Cannot open the file.";
+    }
+    vector<bitset<32>> machineCodes;
+    bitset<32> machineCode;
+    while (fin.read(reinterpret_cast<char*>(&machineCode), sizeof(machineCode))) {
+        machineCodes.push_back(machineCode);
+    }
+    fin.close();
+    return disassembler(sys, machineCodes);
 }
 
 inline static int complement2int(const bitset<16> complement) {
@@ -66,7 +77,7 @@ static string instructionRType(System& sys, const string machineCode) {
     }
     return instruction;
 }
-static string instructionIType(System& sys, const string machineCode, const unsigned int insCount) {
+static string instructionIType(System& sys, const string machineCode) {
     int op = stoi(machineCode.substr(0, 6), nullptr, 2);
     int rs = stoi(machineCode.substr(6, 5), nullptr, 2);
     int rt = stoi(machineCode.substr(11, 5), nullptr, 2);
@@ -96,7 +107,7 @@ static string instructionIType(System& sys, const string machineCode, const unsi
 static string instructionJType(System& sys, const string machineCode, const unsigned int insCount) {
     int op = stoi(machineCode.substr(0, 6), nullptr, 2);
     int addr = stoi(machineCode.substr(6, 26), nullptr, 2);
-    int PC = 0x00400000 + (insCount << 2);
+    int PC = 0x00400000 + (insCount << 2);  // FIXME: 注意这边的PC最后要和sys统一
     string instruction;
     if (op == 0x02) {  // j
         instruction = opDic.at(op) + " " + to_string((PC & 0xf0000000) | (addr << 2));
