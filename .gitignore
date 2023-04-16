@@ -4,6 +4,8 @@
 /.vscode/
 Mars4*
 /.idea/
+CMakeLists.txt.user
+test.*
 
 # Prerequisites
 *.d
