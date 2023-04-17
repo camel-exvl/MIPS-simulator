@@ -40,9 +40,24 @@ vector<string> disassemblerOpenFile(System& sys, const string& fileName) {
     if (!fin) {
         throw "Error: Cannot open the file.";
     }
+    fin.seekg(0, ios::end);
+    int fileSize = fin.tellg();
+    if (fileSize % 4 != 0) {
+        throw "Error: The file is not a valid MIPS binary file.";
+    }
+    fin.seekg(0, ios::beg);
     vector<bitset<32>> machineCodes;
     bitset<32> machineCode;
-    while (fin.read(reinterpret_cast<char*>(&machineCode), sizeof(machineCode))) {
+    char ch;
+    for (int i = 0; i < fileSize / 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            fin.read(&ch, 1);
+            machineCode <<= 8;
+            for (int k = 0; k < 8; k++) {
+                machineCode[k] = ch & 1;
+                ch >>= 1;
+            }
+        }
         machineCodes.push_back(machineCode);
     }
     fin.close();

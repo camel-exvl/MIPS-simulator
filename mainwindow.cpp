@@ -5,6 +5,7 @@
 #include "disassembler.h"
 #include "systemsimulation.h"
 #include "QFileDialog"
+#include "QMessageBox"
 
 using namespace std;
 
@@ -36,10 +37,13 @@ void MainWindow::disassembleOpenActionTriggered() {
     }
     try {
         vector<string> res = disassemblerOpenFile(sys, fileName.toStdString());
+        // For Debug
+        string s = "";
         for (auto &i : res) {
-            qDebug() << i.c_str();
+            s += i + "\n";
         }
+        QMessageBox::information(this, "反汇编", QString::fromStdString(s));
     } catch (const char *msg) {
-        qDebug() << msg;
+        QMessageBox::warning(this, "错误", "文件打开失败：\n" + QString::fromStdString(msg));
     }
 }
