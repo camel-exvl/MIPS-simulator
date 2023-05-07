@@ -33,6 +33,8 @@ public:
     Register(int number, std::string&& name, std::bitset<32>&& value) : number{ number }, name{ std::move(name) }, value{ std::move(value) } {}
 
     std::string GetName() const { return name; }
+    int Getnumber() const { return number; }
+    std::bitset<32> Getvalue() const { return value; }
     
     friend class System;
 };
@@ -87,11 +89,14 @@ public:
     {
         PC.value = std::bitset <32>{ 0x00400000 };
         InitRegister();
+        InitMemory();
     }
 
 private:
     //初始化寄存器组
     void InitRegister();
+    //将代码全部存入内存部分
+    void InitMemory();
 
 public:
     //根据编号找到寄存器并返回寄存器类
@@ -108,5 +113,30 @@ public:
 
     //显示内存状态
     void PrintSystem() const;
+
+    //判断指令类型
+    void JudgeInstruction(const bitset<32>& code)
+    
+    //I型指令
+    void InstructionIType(const string machineCode)
+
+    //J型指令
+    void InstructionJType(const string machineCode)//J型指令只有J，所以直接判断即可
+
+    //R型指令
+    void InstructionRType(const string machineCode)
+
+    //各种指令类型对的系统操作
+    void Add();
+    void Addi();
+    void Sub();
+    void Sll();
+    void And();
+    void Or();
+    void Jr();
+    void Lw();
+    void Sw();
+    void Beq();
+
 };
 
