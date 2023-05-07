@@ -1,119 +1,191 @@
 #include"systemsimulation.h"
 
 using namespace std;
-
-//³õÊ¼»¯¼Ä´æÆ÷×é
+int textline=0;//è®¾ç½®è¾“å…¥æ•°æ®ç›®å‰è¯»å–åˆ°ç¬¬å‡ è¡Œ
+//åˆå§‹åŒ–å¯„å­˜å™¨ç»„
 void System::InitRegister()
 {
     bitset<32> b(0);
-    registers.at(0) = Register{ 0, "$zero", b };  // ²åÈë$zero
-    registers.at(1) = Register{ 1, "at", b };  // ²åÈë$at
+    registers.at(0) = Register{ 0, "$zero", b };  // æ’å…¥$zero
+    registers.at(1) = Register{ 1, "at", b };  // æ’å…¥$at
     for (int i = 2; i < 4; i++) {
         registers.at(i) = Register{ i, "$v" + to_string(i - 2), b };
-        // ²åÈë$v0-%v1
+        // æ’å…¥$v0-%v1
     }
     for (int i = 4; i < 8; i++) {
         registers.at(i) = Register{ i, "$a" + to_string(i - 4), b };
-        // ²åÈë$a0-%a3
+        // æ’å…¥$a0-%a3
     }
     for (int i = 8; i < 16; i++) {
         registers.at(i) = Register{ i, "$t" + to_string(i - 8), b };
-        // ²åÈë$t1-$t7
+        // æ’å…¥$t1-$t7
     }
     for (int i = 16; i < 24; i++) {
         registers.at(i) = Register{ i, "$s" + to_string(i - 16), b };
-        // ²åÈë$s1-$s7
+        // æ’å…¥$s1-$s7
     }
     for (int i = 24; i < 26; i++) {
         registers.at(i) = Register{ i, "$t" + to_string(i - 16), b };
-        // ²åÈë$t8-$t9
+        // æ’å…¥$t8-$t9
     }
     for (int i = 26; i < 28; i++) {
         registers.at(i) = Register{ i, "$k" + to_string(i - 26), b };
-        // ²åÈë$k0-%k1
+        // æ’å…¥$k0-%k1
     }
-    registers.at(28) = Register{ 28, "$gp", (bitset <32>)0x10008000 };  // ²åÈë$gp
-    registers.at(29) = Register{ 29, "$sp", (bitset <32>)0x7ffffffc };  // ²åÈë$sp
-    registers.at(30) = Register{ 30, "$fp", (bitset <32>)0x7ffffffc };  // ²åÈë$fp
-    registers.at(31) = Register{ 31, "$ra", b };  // ²åÈë$ra
+    registers.at(28) = Register{ 28, "$gp", (bitset <32>)0x10008000 };  // æ’å…¥$gp
+    registers.at(29) = Register{ 29, "$sp", (bitset <32>)0x7ffffffc };  // æ’å…¥$sp
+    registers.at(30) = Register{ 30, "$fp", (bitset <32>)0x7ffffffc };  // æ’å…¥$fp
+    registers.at(31) = Register{ 31, "$ra", b };  // æ’å…¥$ra
 }
 
-//¸ù¾İ±àºÅÕÒµ½¼Ä´æÆ÷²¢·µ»Ø¼Ä´æÆ÷Àà
+void System::InitMemory()   
+{
+    
+}
+
+//æ ¹æ®ç¼–å·æ‰¾åˆ°å¯„å­˜å™¨å¹¶è¿”å›å¯„å­˜å™¨ç±»
 Register& System::FindRegister(int number)
 {
-    //±éÀú¼Ä´æÆ÷×é
+    //éå†å¯„å­˜å™¨ç»„
     for (auto& i : registers)
         if (i.number == number)
             return i;
-    //ÈôÕÒ²»µ½Ôò±¨´í
-    cerr << "¼Ä´æÆ÷²»´æÔÚ" << endl;
+    //è‹¥æ‰¾ä¸åˆ°åˆ™æŠ¥é”™
+    cerr << "å¯„å­˜å™¨ä¸å­˜åœ¨" << endl;
     exit(-1);
 }
 
-//¸ù¾İÃû³ÆÕÒµ½¼Ä´æÆ÷²¢·µ»Ø¼Ä´æÆ÷Àà
+//æ ¹æ®åç§°æ‰¾åˆ°å¯„å­˜å™¨å¹¶è¿”å›å¯„å­˜å™¨ç±»
 Register& System::FindRegister(const string& name)
 {
-    //±éÀú¼Ä´æÆ÷×é
+    //éå†å¯„å­˜å™¨ç»„
     for (auto& i : registers)
         if (i.name == name)
             return i;
-    //ÈôÕÒ²»µ½Ôò±¨´í
-    cerr << "¼Ä´æÆ÷²»´æÔÚ" << endl;
+    //è‹¥æ‰¾ä¸åˆ°åˆ™æŠ¥é”™
+    cerr << "å¯„å­˜å™¨ä¸å­˜åœ¨" << endl;
     exit(-1);
 }
 
-//·ÃÎÊÄÚ´æ£¬ÊäÈëµØÖ·£¬·µ»ØÄÚ´æµØÖ·ÄÚÈİ
+//è®¿é—®å†…å­˜ï¼Œè¾“å…¥åœ°å€ï¼Œè¿”å›å†…å­˜åœ°å€å†…å®¹
 bitset<32>& System::AccessMemory(const bitset<32>& address)
 {
-    //±£ÁôÇø£¬½ûÖ¹·ÃÎÊ
+    //ä¿ç•™åŒºï¼Œç¦æ­¢è®¿é—®
     if (address.to_ulong() < 0x00400000)
     {
-        cerr << "ÄÚ´æ±£ÁôÇøÓò£¬²»ÔÊĞí·ÃÎÊ" << endl;
+        cerr << "å†…å­˜ä¿ç•™åŒºåŸŸï¼Œä¸å…è®¸è®¿é—®" << endl;
         exit(-1);
     }
-    //´úÂë¶Î£¬·µ»Ø»úÆ÷Ö¸Áî
+    //ä»£ç æ®µï¼Œè¿”å›æœºå™¨æŒ‡ä»¤
     else if (address.to_ulong() < 0x10000000)
     {
-        if (address.to_ulong() < mem.texttop.to_ulong())
+        if (address.to_ulong() < mem.texttop.to_ulong())//<=?//
             return mem.text_segment.at(address.to_ulong());
         else
         {
-            cerr << "¸ÃµØÖ·Ã»ÓĞ´úÂë´æ´¢£¬²»ÔÊĞí·ÃÎÊ" << endl;
+            cerr << "è¯¥åœ°å€æ²¡æœ‰ä»£ç å­˜å‚¨ï¼Œä¸å…è®¸è®¿é—®" << endl;
             exit(-1);
         }
     }
-    //Êı¾İ¶Î£¬·µ»Ø´æ´¢Êı¾İ
+    //æ•°æ®æ®µï¼Œè¿”å›å­˜å‚¨æ•°æ®
     else if (address.to_ulong() < registers.at(29).value.to_ulong())
     {
         return mem.data_segment.at(address.to_ulong());
     }
-    //¶ÑÕ»¶Î£¬·µ»Ø¶ÑÕ»Êı¾İ
+    //å †æ ˆæ®µï¼Œè¿”å›å †æ ˆæ•°æ®
     else if (address.to_ulong() < 0x7fffffff)
     {
         return mem.stack_segment[address.to_ulong()];
     }
-    //µØÖ·Ô½½ç±¨´í
+    //åœ°å€è¶Šç•ŒæŠ¥é”™
     else
     {
-        cerr << "´íÎóµÄÄÚ´æµØÖ·£¬³¬³öÄÚ´æ´óĞ¡" << endl;
+        cerr << "é”™è¯¯çš„å†…å­˜åœ°å€ï¼Œè¶…å‡ºå†…å­˜å¤§å°" << endl;
         exit(-1);
     }
 }
 
-//ÏòÄÚ´æ´úÂë¶ÎÌí¼Ó»úÆ÷Ö¸Áî
+//å‘å†…å­˜ä»£ç æ®µæ·»åŠ æœºå™¨æŒ‡ä»¤
 void System::PushCodeToMemory(const bitset<32>& code)
 {
     mem.text_segment[mem.texttop.to_ulong()] = code;
     mem.texttop = bitset<32>{ mem.texttop.to_ulong() + 0x04 };
-    //Èô´úÂë³¬³öÄÚ´æ´úÂë¶Î±¨´í
+    //è‹¥ä»£ç è¶…å‡ºå†…å­˜ä»£ç æ®µæŠ¥é”™
     if (mem.texttop.to_ulong() > 0x10000100)
     {
-        cerr << "´úÂëÊıÁ¿³¬¹ıÄÚ´æ´úÂë¶Î´óĞ¡" << endl;
+        cerr << "ä»£ç æ•°é‡è¶…è¿‡å†…å­˜ä»£ç æ®µå¤§å°" << endl;
         exit(-1);
     }
 }
 
 void System::PrintSystem() const
 {
-    //¿´ºóÆÚÒª²»Òª×öÍ¼ĞÎ½çÃæ
+    //çœ‹åæœŸè¦ä¸è¦åšå›¾å½¢ç•Œé¢
+}
+
+void InstructionRType(const string machineCode)
+{
+    int rs = stoi(machineCode.substr(6, 5), nullptr, 2);
+    int rt = stoi(machineCode.substr(11, 5), nullptr, 2);
+    int rd = stoi(machineCode.substr(16, 5), nullptr, 2);
+    int shamt = stoi(machineCode.substr(21, 5), nullptr, 2);
+    int funct = stoi(machineCode.substr(26, 6), nullptr, 2);
+    if(funct== 0x20)
+    Add();
+    else if(funct== 0x22)
+    Sub();
+    else if(funct== 0x00)
+    Sll();
+    else if(funct== 0x24)
+    And();
+    else if(funct== 0x25)
+    Or();
+    else
+    Jr();
+}
+
+void InstructionJType(const string machineCode)//Jå‹æŒ‡ä»¤åªæœ‰Jï¼Œæ‰€ä»¥ç›´æ¥åˆ¤æ–­å³å¯
+{
+    int addr = stoi(machineCode.substr(6, 26), nullptr, 2);
+    string str = PC.Getvalue().to_string();
+    string first = str.substr(0, 4);
+    string second = to_string(addr);
+    string strPC = first+second+"00";
+    PC.Getvalue()=bitset<32> bits(strPC);
+    //26ä½åé¢åŠ 00ï¼Œå‰é¢å–PCçš„å‰4ä½åŠ èµ·æ¥ç»„æˆ32ä½   
+}
+
+void InstructionIType(const string machineCode)
+{
+    int op = stoi(machineCode.substr(0, 6), nullptr, 2);
+    int rs = stoi(machineCode.substr(6, 5), nullptr, 2);
+    int rt = stoi(machineCode.substr(11, 5), nullptr, 2);
+    bitset<16> immediate(machineCode.substr(16, 16));
+    int imm = complement2int(immediate);
+    if(op== 0x08)
+    Addi();
+    else if(funct== 0x23)
+    Lw();
+    else if(funct== 0x2B)
+    Sw();
+    else if(funct== 0x04)
+    Beq();
+}
+
+void JudgeInstruction(const bitset<32>& code)
+{
+    string machinecode=code.to_string();
+    int op = code.to_ulong() >> 26;
+    if (op == 0) //Rå‹æŒ‡ä»¤ ADD,SUB,SLL,AND,OR,JR
+    {
+        InstructionRType(machinecode);      
+    } 
+    else if (op >> 1 == 1 || op >> 2 == 0b100) //Jå‹æŒ‡ä»¤ J
+    {
+        InstructionJType(machinecode);  
+    } 
+    else //Iå‹æŒ‡ä»¤ ADDI LW SW BEQ
+    {
+        InstructionIType(machinecode);  
+    }
 }
