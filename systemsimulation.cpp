@@ -141,7 +141,7 @@ void System::InstructionRType(const string machineCode)
     else if(funct== 0x25)
     Or();
     else
-    Jr();
+    Jr(rs);
 }
 
 void System::InstructionJType(const string machineCode)//J型指令只有J，所以直接判断即可
@@ -169,12 +169,12 @@ void System::InstructionIType(const string machineCode)
     int imm = complement2int(immediate);
     if(op== 0x08)
     Addi();
-    else if(op== 0x23)
-    Lw();
+    else if(op== 0x23)                                                                                   
+    Lw(rs,rt,imm);
     else if(op== 0x2B)
-    Sw();
+    Sw(rs,rt,imm);
     else if(op== 0x04)
-    Beq();
+    Beq(rs,rt,imm);
 }
 
 void System::JudgeInstruction(const bitset<32>& code)
@@ -193,4 +193,42 @@ void System::JudgeInstruction(const bitset<32>& code)
     {
         InstructionIType(machinecode);  
     }
+}
+
+void System::PcAutoAdd()
+{
+    int address=PC.Getvalue().to_ulong()+4;
+    bitset<32> addr(address);
+    PC.Getvalue()=addr;
+}
+
+void System::Jr(int rs)//跳转到指定寄存器存储的地址
+{
+    PC.Getvalue()=FindRegister(rs).Getvalue();
+}
+void System::Lw(int rs, int rt, int offset)//lw rt rs offset, rs 加载到rt+offset
+//rs 表示要加载的数据的内存地址所在的寄存器编号，rt 表示目标寄存器编号，offset 表示要加载的数据在内存中的偏移量。
+{
+    int address=FindRegister(rs).Getvalue().to_ulong()+offset;
+    bitset<32> addr(address);
+    FindRegister(rt).Getvalue()=AccessMemory(addr);
+    PcAutoAdd();
+}
+void System::Sw(int rs, int rt, int offset)//sw rt rs offset rt存到rs+offset:给目标地址赋值
+{
+    int address=FindRegister(rs).Getvalue().to_ulong()+offset;
+    bitset<32> addr(address);
+    AccessMemory(addr)=FindRegister(rt).Getvalue();
+    PcAutoAdd();
+}
+void System::Beq(int rs, int rt, int offset)//beq rt rs offset 如果rt值=rs值，跳转到PC+offset
+{
+    if(FindRegister(rs).Getvalue()==FindRegister(rt).Getvalue())
+    {
+        int address=PC.Getvalue().to_ulong()+offset;
+        bitset<32> addr(address);
+        PC.Getvalue()=addr;
+    }
+    else
+    PcAutoAdd();
 }

@@ -133,9 +133,9 @@ public:
     void Sll();
     void And();
     void Or();
-    void Jr();
-    void Lw();
-    void Sw();
-    void Beq();
+    void Jr(int rs);//
+    void Lw(int rs, int rt, int offset);//
+    void Sw(int rs, int rt, int offset);//
+    void Beq(int rs, int rt, int offset);//
 
 };
