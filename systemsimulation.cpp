@@ -123,7 +123,7 @@ void System::PrintSystem() const
     //看后期要不要做图形界面
 }
 
-void InstructionRType(const string machineCode)
+void System::InstructionRType(const string machineCode)
 {
     int rs = stoi(machineCode.substr(6, 5), nullptr, 2);
     int rt = stoi(machineCode.substr(11, 5), nullptr, 2);
@@ -144,18 +144,23 @@ void InstructionRType(const string machineCode)
     Jr();
 }
 
-void InstructionJType(const string machineCode)//J型指令只有J，所以直接判断即可
+void System::InstructionJType(const string machineCode)//J型指令只有J，所以直接判断即可
 {
     int addr = stoi(machineCode.substr(6, 26), nullptr, 2);
     string str = PC.Getvalue().to_string();
     string first = str.substr(0, 4);
     string second = to_string(addr);
     string strPC = first+second+"00";
-    PC.Getvalue()=bitset<32> bits(strPC);
+    bitset<32> bits(strPC);
+    PC.Getvalue()=bits;
     //26位后面加00，前面取PC的前4位加起来组成32位   
 }
 
-void InstructionIType(const string machineCode)
+inline static int complement2int(const bitset<16> complement) {
+    return complement[15] ? -((~complement).to_ulong() + 1) : complement.to_ulong();
+}
+
+void System::InstructionIType(const string machineCode)
 {
     int op = stoi(machineCode.substr(0, 6), nullptr, 2);
     int rs = stoi(machineCode.substr(6, 5), nullptr, 2);
@@ -164,15 +169,15 @@ void InstructionIType(const string machineCode)
     int imm = complement2int(immediate);
     if(op== 0x08)
     Addi();
-    else if(funct== 0x23)
+    else if(op== 0x23)
     Lw();
-    else if(funct== 0x2B)
+    else if(op== 0x2B)
     Sw();
-    else if(funct== 0x04)
+    else if(op== 0x04)
     Beq();
 }
 
-void JudgeInstruction(const bitset<32>& code)
+void System::JudgeInstruction(const bitset<32>& code)
 {
     string machinecode=code.to_string();
     int op = code.to_ulong() >> 26;

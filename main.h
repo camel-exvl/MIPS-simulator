@@ -115,16 +115,16 @@ public:
     void PrintSystem() const;
 
     //判断指令类型
-    void JudgeInstruction(const bitset<32>& code)
+    void JudgeInstruction(const std::bitset<32>& code);
     
     //I型指令
-    void InstructionIType(const string machineCode)
+    void InstructionIType(const std::string machineCode);
 
     //J型指令
-    void InstructionJType(const string machineCode)//J型指令只有J，所以直接判断即可
+    void InstructionJType(const std::string machineCode);//J型指令只有J，所以直接判断即可
 
     //R型指令
-    void InstructionRType(const string machineCode)
+    void InstructionRType(const std::string machineCode);
 
     //各种指令类型对的系统操作
     void Add();
