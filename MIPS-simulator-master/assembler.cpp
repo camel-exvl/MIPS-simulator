@@ -46,7 +46,7 @@ static void Beq(vector<string> code, unsigned int i);
 //     //PrintHexAddress();
 //     return 0;
 // }
-std::vector<std::bitset<32>> assembler(System& sys, std::vector<std::string> s){
+std::vector<std::bitset<32>> assembler(std::vector<std::string> s){
     string temp;
     for (int i = 0; i < s.size(); i++) {// 读取指令并插入，地址统一从0开始
         temp = s[i];
@@ -77,6 +77,21 @@ std::vector<std::bitset<32>> assembler(System& sys, std::vector<std::string> s){
     return re;
 }
 
+std::vector<std::bitset<32>> assemblerOpenFile(const string& fileName){
+    ifstream fin(fileName, ios::in);
+    if (!fin) {
+        throw "Error: Cannot open the file.";
+    }
+    fin.seekg(0, ios::end);
+    fin.seekg(0, ios::beg);
+    vector<string> assemblerCodes;
+    string assemblerCode;
+    while(getline(fin,assemblerCode)){
+        assemblerCodes.push_back(assemblerCode);
+    }
+    fin.close();
+    return assembler(assemblerCodes);
+}
 
 
 // 读取汇编码并按空格分隔成vector<string>并去除逗号，处理标签
