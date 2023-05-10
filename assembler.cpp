@@ -91,7 +91,7 @@ std::vector<std::bitset<32>> assemblerOpenFile(System& sys, const string& fileNa
         assemblerCodes.push_back(assemblerCode);
     }
     fin.close();
-    return assembler(assemblerCodes);
+    return assembler(sys,assemblerCodes);
 }
 
 
