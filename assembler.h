@@ -12,6 +12,10 @@ public:
             address), assemblecode(assemblecode), machinecode(machinecode) {};
 };
 
+std::vector<std::bitset<32>> assembler(System& sys, std::vector<std::string> s);
+
+std::vector<std::bitset<32>> assemblerOpenFile(System& sys, const string& fileName);
+
 // 读取汇编码并按空格分隔成vector<string>并去除逗号，
 // 如果第一个子字符串不是要处理的指令码，判断其为标签，去除并加入标签库，处理后的结果插入Instruction
 void InputInsToMap();

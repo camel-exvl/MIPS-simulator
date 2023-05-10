@@ -46,6 +46,55 @@ static void Beq(vector<string> code, unsigned int i);
 //     //PrintHexAddress();
 //     return 0;
 // }
+vector<bitset<32>> assembler(System& sys, vector<string> s) {
+    string temp;
+    for (int i = 0; i < s.size(); i++) {// 读取指令并插入，地址统一从0开始
+        temp = s[i];
+        string result;// 临时存放分割后的子字符串
+        vector<string> words;
+        stringstream iss(temp);
+        int pos;//','的位置
+        while (iss >> result) {// 按空格分隔后push入vector
+            if ((pos = result.find(',')) >= 0)
+                result.erase(pos);
+            words.push_back(result);
+        }
+        // 如果第一个字符串不是任何我们要处理的指令字符串，将其作为标签处理
+        if (count(begin(allinstructions), end(allinstructions), words.at(0)) <= 0) {
+            // 将标签加入标签库并在原指令开头中去除
+            words[0].pop_back();//去掉标签末尾的':'
+            Lables.emplace_back(StartAddress + Count * 4, words.at(0));
+            words.erase(words.begin());
+        }
+        Instruction tempins(bitset<32>(StartAddress + (Count++) * 4), words, bitset<32>(0));
+        instructions.push_back(tempins);
+    }
+    Compilation();
+    vector<bitset<32>> re;
+    for (int i = 0; i < instructions.size(); i++) {
+        re.push_back(instructions[i].machinecode);
+    }
+    sys.PushCodeToMemory(re);
+    return re;
+}
+
+std::vector<std::bitset<32>> assemblerOpenFile(System& sys, const string& fileName){
+    ifstream fin(fileName, ios::in);
+    if (!fin) {
+        throw "Error: Cannot open the file.";
+    }
+    fin.seekg(0, ios::end);
+    fin.seekg(0, ios::beg);
+    vector<string> assemblerCodes;
+    string assemblerCode;
+    while(getline(fin,assemblerCode)){
+        assemblerCodes.push_back(assemblerCode);
+    }
+    fin.close();
+    return assembler(assemblerCodes);
+}
+
+
 
 // 读取汇编码并按空格分隔成vector<string>并去除逗号，处理标签
 void InputInsToMap() {
@@ -73,7 +122,6 @@ void InputInsToMap() {
         Instruction tempins(bitset<32>(StartAddress + (Count++) * 4), words, bitset<32>(0));
         instructions.push_back(tempins);
     }
-
 }
 
 // 汇编的主程序
