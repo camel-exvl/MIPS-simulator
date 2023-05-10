@@ -131,17 +131,17 @@ void System::InstructionRType(const string machineCode)
     int shamt = stoi(machineCode.substr(21, 5), nullptr, 2);
     int funct = stoi(machineCode.substr(26, 6), nullptr, 2);
     if(funct== 0x20)
-    Add(rs,rt,rd);
+    Add();
     else if(funct== 0x22)
-    Sub(rs, rt, rd);
+    Sub();
     else if(funct== 0x00)
-    Sll(rt, rd, shamt);
+    Sll();
     else if(funct== 0x24)
-    And(rs, rt, rd);
+    And();
     else if(funct== 0x25)
-    Or(rs, rt, rd);
+    Or();
     else
-    Jr(rs);
+    Jr();
 }
 
 void System::InstructionJType(const string machineCode)//J型指令只有J，所以直接判断即可
@@ -160,10 +160,6 @@ inline static int complement2int(const bitset<16> complement) {
     return complement[15] ? -((~complement).to_ulong() + 1) : complement.to_ulong();
 }
 
-inline static int complement2int(const bitset<32> complement) {
-    return complement[31] ? -((~complement).to_ulong() + 1) : complement.to_ulong();
-}
-
 void System::InstructionIType(const string machineCode)
 {
     int op = stoi(machineCode.substr(0, 6), nullptr, 2);
@@ -172,13 +168,13 @@ void System::InstructionIType(const string machineCode)
     bitset<16> immediate(machineCode.substr(16, 16));
     int imm = complement2int(immediate);
     if(op== 0x08)
-    Addi(rs,rt,imm);
-    else if(op== 0x23)                                                                                   
-    Lw(rs,rt,imm);
+    Addi();
+    else if(op== 0x23)
+    Lw();
     else if(op== 0x2B)
-    Sw(rs,rt,imm);
+    Sw();
     else if(op== 0x04)
-    Beq(rs,rt,imm);
+    Beq();
 }
 
 void System::JudgeInstruction(const bitset<32>& code)
@@ -197,76 +193,4 @@ void System::JudgeInstruction(const bitset<32>& code)
     {
         InstructionIType(machinecode);  
     }
-}
-
-void System::PcAutoAdd()
-{
-    int address=PC.Getvalue().to_ulong()+4;
-    bitset<32> addr{ address };
-    PC.Getvalue()=addr;
-}
-
-void System::Add(int rs, int rt, int rd)
-{
-    unsigned long temp = FindRegister(rs).value.to_ulong() + FindRegister(rt).value.to_ulong();
-    FindRegister(rd).value = bitset<32>{ temp };
-    PcAutoAdd();
-}
-void System::Sub(int rs, int rt, int rd)
-{
-    unsigned long temp = FindRegister(rs).value.to_ulong() + (~FindRegister(rt).value).to_ulong() + 1;
-    FindRegister(rd).value = bitset<32>{ temp };
-    PcAutoAdd();
-}
-void System::Sll(int rt,int rd,int shamt)
-{
-    FindRegister(rd).value = FindRegister(rt).value << shamt;
-    PcAutoAdd();
-}
-void System::And(int rs, int rt, int rd)
-{
-    FindRegister(rd).value = FindRegister(rs).value & FindRegister(rt).value;
-    PcAutoAdd();
-}
-void System::Or(int rs, int rt, int rd)
-{
-    FindRegister(rd).value = FindRegister(rs).value | FindRegister(rt).value;
-    PcAutoAdd();
-}
-void System::Addi(int rs, int rt, int imm)
-{
-    int temp = complement2int(FindRegister(rs).value) + imm;
-    FindRegister(rt).value = temp >= 0 ? bitset<32>{ temp } : bitset<32>{ (~bitset<32>{ -temp }).to_ulong + 1 };
-    PcAutoAdd();
-}
-
-void System::Jr(int rs)//跳转到指定寄存器存储的地址
-{
-    PC.Getvalue()=FindRegister(rs).Getvalue();
-}
-void System::Lw(int rs, int rt, int offset)//lw rt rs offset, rs 加载到rt+offset
-//rs 表示要加载的数据的内存地址所在的寄存器编号，rt 表示目标寄存器编号，offset 表示要加载的数据在内存中的偏移量。
-{
-    int address=FindRegister(rs).Getvalue().to_ulong()+offset;
-    bitset<32> addr(address);
-    FindRegister(rt).Getvalue()=AccessMemory(addr);
-    PcAutoAdd();
-}
-void System::Sw(int rs, int rt, int offset)//sw rt rs offset rt存到rs+offset:给目标地址赋值
-{
-    int address=FindRegister(rs).Getvalue().to_ulong()+offset;
-    bitset<32> addr(address);
-    AccessMemory(addr)=FindRegister(rt).Getvalue();
-    PcAutoAdd();
-}
-void System::Beq(int rs, int rt, int offset)//beq rt rs offset 如果rt值=rs值，跳转到PC+offset
-{
-    if(FindRegister(rs).Getvalue()==FindRegister(rt).Getvalue())
-    {
-        int address=PC.Getvalue().to_ulong()+offset;
-        bitset<32> addr(address);
-        PC.Getvalue()=addr;
-    }
-    else
-    PcAutoAdd();
 }

@@ -127,15 +127,15 @@ public:
     void InstructionRType(const std::string machineCode);
 
     //各种指令类型对的系统操作
-    void Add(int rs, int rt, int rd);
-    void Addi(int rs, int rt, int imm);
-    void Sub(int rs, int rt, int rd);
-    void Sll(int rt, int rd, int shamt);
-    void And(int rs, int rt, int rd);
-    void Or(int rs, int rt, int rd);
-    void Jr(int rs);//
-    void Lw(int rs, int rt, int offset);//
-    void Sw(int rs, int rt, int offset);//
-    void Beq(int rs, int rt, int offset);//
+    void Add();
+    void Addi();
+    void Sub();
+    void Sll();
+    void And();
+    void Or();
+    void Jr();
+    void Lw();
+    void Sw();
+    void Beq();
 
 };

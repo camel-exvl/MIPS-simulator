@@ -46,7 +46,7 @@ static void Beq(vector<string> code, unsigned int i);
 //     //PrintHexAddress();
 //     return 0;
 // }
-vector<bitset<32>> assembler(System& sys, vector<string> s) {
+std::vector<std::bitset<32>> assembler(std::vector<std::string> s){
     string temp;
     for (int i = 0; i < s.size(); i++) {// 读取指令并插入，地址统一从0开始
         temp = s[i];
@@ -74,11 +74,10 @@ vector<bitset<32>> assembler(System& sys, vector<string> s) {
     for (int i = 0; i < instructions.size(); i++) {
         re.push_back(instructions[i].machinecode);
     }
-    sys.PushCodeToMemory(re);
     return re;
 }
 
-std::vector<std::bitset<32>> assemblerOpenFile(System& sys, const string& fileName){
+std::vector<std::bitset<32>> assemblerOpenFile(const string& fileName){
     ifstream fin(fileName, ios::in);
     if (!fin) {
         throw "Error: Cannot open the file.";
@@ -93,7 +92,6 @@ std::vector<std::bitset<32>> assemblerOpenFile(System& sys, const string& fileNa
     fin.close();
     return assembler(assemblerCodes);
 }
-
 
 
 // 读取汇编码并按空格分隔成vector<string>并去除逗号，处理标签
@@ -122,6 +120,7 @@ void InputInsToMap() {
         Instruction tempins(bitset<32>(StartAddress + (Count++) * 4), words, bitset<32>(0));
         instructions.push_back(tempins);
     }
+
 }
 
 // 汇编的主程序
@@ -177,8 +176,8 @@ void Compilation() {
 // 根据寄存器名字找到编号
 static int FindNumByName(const string &name) {
     for (auto &i: registers) {
-        if (i.name == name)
-            return i.number;
+        if (i.GetName() == name)
+            return i.Getnumber();
     }
     return -1;// 未找到
 }
@@ -186,8 +185,8 @@ static int FindNumByName(const string &name) {
 // 根据寄存器名字找到值
 static bitset<32> FindValueByName(const string &name) {
     for (auto &i: registers) {
-        if (i.name == name)
-            return i.value;
+        if (i.GetName() == name)
+            return i.Getvalue();
     }
     return NULL;// 未找到
 }
