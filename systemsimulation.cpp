@@ -131,15 +131,15 @@ void System::InstructionRType(const string machineCode)
     int shamt = stoi(machineCode.substr(21, 5), nullptr, 2);
     int funct = stoi(machineCode.substr(26, 6), nullptr, 2);
     if(funct== 0x20)
-    Add();
+    Add(rs,rt,rd);
     else if(funct== 0x22)
-    Sub();
+    Sub(rs, rt, rd);
     else if(funct== 0x00)
-    Sll();
+    Sll(rt, rd, shamt);
     else if(funct== 0x24)
-    And();
+    And(rs, rt, rd);
     else if(funct== 0x25)
-    Or();
+    Or(rs, rt, rd);
     else
     Jr(rs);
 }
@@ -160,6 +160,10 @@ inline static int complement2int(const bitset<16> complement) {
     return complement[15] ? -((~complement).to_ulong() + 1) : complement.to_ulong();
 }
 
+inline static int complement2int(const bitset<32> complement) {
+    return complement[31] ? -((~complement).to_ulong() + 1) : complement.to_ulong();
+}
+
 void System::InstructionIType(const string machineCode)
 {
     int op = stoi(machineCode.substr(0, 6), nullptr, 2);
@@ -168,7 +172,7 @@ void System::InstructionIType(const string machineCode)
     bitset<16> immediate(machineCode.substr(16, 16));
     int imm = complement2int(immediate);
     if(op== 0x08)
-    Addi();
+    Addi(rs,rt,imm);
     else if(op== 0x23)                                                                                   
     Lw(rs,rt,imm);
     else if(op== 0x2B)
@@ -198,8 +202,42 @@ void System::JudgeInstruction(const bitset<32>& code)
 void System::PcAutoAdd()
 {
     int address=PC.Getvalue().to_ulong()+4;
-    bitset<32> addr(address);
+    bitset<32> addr{ address };
     PC.Getvalue()=addr;
+}
+
+void System::Add(int rs, int rt, int rd)
+{
+    unsigned long temp = FindRegister(rs).value.to_ulong() + FindRegister(rt).value.to_ulong();
+    FindRegister(rd).value = bitset<32>{ temp };
+    PcAutoAdd();
+}
+void System::Sub(int rs, int rt, int rd)
+{
+    unsigned long temp = FindRegister(rs).value.to_ulong() + (~FindRegister(rt).value).to_ulong() + 1;
+    FindRegister(rd).value = bitset<32>{ temp };
+    PcAutoAdd();
+}
+void System::Sll(int rt,int rd,int shamt)
+{
+    FindRegister(rd).value = FindRegister(rt).value << shamt;
+    PcAutoAdd();
+}
+void System::And(int rs, int rt, int rd)
+{
+    FindRegister(rd).value = FindRegister(rs).value & FindRegister(rt).value;
+    PcAutoAdd();
+}
+void System::Or(int rs, int rt, int rd)
+{
+    FindRegister(rd).value = FindRegister(rs).value | FindRegister(rt).value;
+    PcAutoAdd();
+}
+void System::Addi(int rs, int rt, int imm)
+{
+    int temp = complement2int(FindRegister(rs).value) + imm;
+    FindRegister(rt).value = temp >= 0 ? bitset<32>{ temp } : bitset<32>{ (~bitset<32>{ -temp }).to_ulong + 1 };
+    PcAutoAdd();
 }
 
 void System::Jr(int rs)//跳转到指定寄存器存储的地址
