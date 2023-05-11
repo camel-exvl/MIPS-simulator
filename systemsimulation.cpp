@@ -1,3 +1,4 @@
+#include"main.h"
 #include"systemsimulation.h"
 
 using namespace std;
