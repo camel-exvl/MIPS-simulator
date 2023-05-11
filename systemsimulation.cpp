@@ -162,7 +162,7 @@ inline static int complement2int(const bitset<16> complement) {
 }
 
 inline static int complement2int(const bitset<32> complement) {
-    return complement[31] ? -(int((~complement).to_ulong() + 1) : complement.to_ulong();
+    return complement[31] ? -(int)((~complement).to_ulong() + 1) : complement.to_ulong();
 }
 
 void System::InstructionIType(const string machineCode)
