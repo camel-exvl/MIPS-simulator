@@ -20,7 +20,7 @@ std::vector<std::bitset<32>> assemblerOpenFile(System& sys, const string& fileNa
 // 如果第一个子字符串不是要处理的指令码，判断其为标签，去除并加入标签库，处理后的结果插入Instruction
 void InputInsToMap();
 
-void Compilation();//汇编的主要程序
+void Compilation(System& sys);//汇编的主要程序
 
 void PrintBinaryAddress();
 
