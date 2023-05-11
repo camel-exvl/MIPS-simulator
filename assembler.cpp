@@ -2,7 +2,7 @@
 
 using namespace std;
 
-extern vector<Register> registers;
+//extern vector<Register> registers;
 const unsigned int StartAddress = 0x00400000;  // 0x00400000,指令的初始地址
 
 // 记录指令数量
@@ -69,12 +69,12 @@ vector<bitset<32>> assembler(System& sys, vector<string> s) {
         Instruction tempins(bitset<32>(StartAddress + (Count++) * 4), words, bitset<32>(0));
         instructions.push_back(tempins);
     }
-    Compilation();
+    Compilation(sys);
     vector<bitset<32>> re;
     for (int i = 0; i < instructions.size(); i++) {
         re.push_back(instructions[i].machinecode);
+        sys.PushCodeToMemory(instructions[i].machinecode);
     }
-    sys.PushCodeToMemory(re);
     return re;
 }
 
@@ -125,72 +125,72 @@ void InputInsToMap() {
 }
 
 // 汇编的主程序
-void Compilation() {
+void Compilation(System& sys) {
     for (int i = 0; i < Count; i++) {
         if (instructions.at(i).assemblecode.at(0) == "add") {
-            Add(instructions.at(i).assemblecode, i);
+            Add(instructions.at(i).assemblecode, i, sys);
             continue;
         }
         if (instructions.at(i).assemblecode.at(0) == "addi") {
-            Addi(instructions.at(i).assemblecode, i);
+            Addi(instructions.at(i).assemblecode, i, sys);
             continue;
         }
         if (instructions.at(i).assemblecode.at(0) == "sub") {
-            Sub(instructions.at(i).assemblecode, i);
+            Sub(instructions.at(i).assemblecode, i, sys);
             continue;
         }
         if (instructions.at(i).assemblecode.at(0) == "sll") {
-            Sll(instructions.at(i).assemblecode, i);
+            Sll(instructions.at(i).assemblecode, i, sys);
             continue;
         }
         if (instructions.at(i).assemblecode.at(0) == "and") {
-            And(instructions.at(i).assemblecode, i);
+            And(instructions.at(i).assemblecode, i, sys);
             continue;
         }
         if (instructions.at(i).assemblecode.at(0) == "or") {
-            Or(instructions.at(i).assemblecode, i);
+            Or(instructions.at(i).assemblecode, i, sys);
             continue;
         }
         if (instructions.at(i).assemblecode.at(0) == "j") {
-            J(instructions.at(i).assemblecode, i);
+            J(instructions.at(i).assemblecode, i, sys);
             continue;
         }
         if (instructions.at(i).assemblecode.at(0) == "jr") {
-            Jr(instructions.at(i).assemblecode, i);
+            Jr(instructions.at(i).assemblecode, i, sys);
             continue;
         }
         if (instructions.at(i).assemblecode.at(0) == "lw") {
-            Lw(instructions.at(i).assemblecode, i);
+            Lw(instructions.at(i).assemblecode, i, sys);
             continue;
         }
         if (instructions.at(i).assemblecode.at(0) == "sw") {
-            Sw(instructions.at(i).assemblecode, i);
+            Sw(instructions.at(i).assemblecode, i, sys);
             continue;
         }
         if (instructions.at(i).assemblecode.at(0) == "beq") {
-            Beq(instructions.at(i).assemblecode, i);
+            Beq(instructions.at(i).assemblecode, i, sys);
             continue;
         }
     }
 }
 
-// 根据寄存器名字找到编号
-static int FindNumByName(const string &name) {
-    for (auto &i: registers) {
-        if (i.name == name)
-            return i.number;
-    }
-    return -1;// 未找到
-}
+//// 根据寄存器名字找到编号
+//static int FindNumByName(const string &name) {
+//    for (auto &i: registers) {
+//        if (i.name == name)
+//            return i.number;
+//    }
+//    return -1;// 未找到
+//}
 
-// 根据寄存器名字找到值
-static bitset<32> FindValueByName(const string &name) {
-    for (auto &i: registers) {
-        if (i.name == name)
-            return i.value;
-    }
-    return NULL;// 未找到
-}
+//// 根据寄存器名字找到值
+//static bitset<32> FindValueByName(const string &name) {
+//    for (auto &i: registers) {
+//        if (i.name == name)
+//            return i.value;
+//    }
+//    return NULL;// 未找到
+//}
 
 // 根据标签名找到对应的地址
 static bitset<32> FindAddressByName(const string &name) {
@@ -202,18 +202,18 @@ static bitset<32> FindAddressByName(const string &name) {
 }
 
 //add rd, rs, rt
-static void Add(vector<string> code, unsigned int i) {
-    int rd = FindNumByName(code.at(1));
-    int rs = FindNumByName(code.at(2));
-    int rt = FindNumByName(code.at(3));
+static void Add(vector<string> code, unsigned int i, System& sys) {
+    int rd = sys.FindRegister(code.at(1)).Getnumber();
+    int rs = sys.FindRegister(code.at(2)).Getnumber();
+    int rt = sys.FindRegister(code.at(3)).Getnumber();
     unsigned int decimal = 32 + rd * 2048 + rt * 65536 + rs * 2097152;
     bitset<32> result(decimal);// 二进制的机器码
     instructions.at(i).machinecode = result;
 }
 
-static void Addi(vector<string> code, unsigned int i) {
-    int rt = FindNumByName(code.at(1));
-    int rs = FindNumByName(code.at(2));
+static void Addi(vector<string> code, unsigned int i, System& sys) {
+    int rt = sys.FindRegister(code.at(1)).Getnumber();
+    int rs = sys.FindRegister(code.at(2)).Getnumber();
     int imm = stoi(code.at(3));
     unsigned int decimal;
     if (imm >= 0) {
@@ -226,43 +226,43 @@ static void Addi(vector<string> code, unsigned int i) {
     instructions.at(i).machinecode = result;
 }
 
-static void Sub(vector<string> code, unsigned int i) {
-    int rd = FindNumByName(code.at(1));
-    int rs = FindNumByName(code.at(2));
-    int rt = FindNumByName(code.at(3));
+static void Sub(vector<string> code, unsigned int i, System& sys) {
+    int rd = sys.FindRegister(code.at(1)).Getnumber();
+    int rs = sys.FindRegister(code.at(2)).Getnumber();
+    int rt = sys.FindRegister(code.at(3)).Getnumber();
     unsigned int decimal = 34 + rd * 2048 + rt * 65536 + rs * 2097152;
     bitset<32> result(decimal);// 二进制的机器码
     instructions.at(i).machinecode = result;
 }
 
-static void Sll(vector<string> code, unsigned int i) {
-    int rd = FindNumByName(code.at(1));
-    int rt = FindNumByName(code.at(2));
+static void Sll(vector<string> code, unsigned int i, System& sys) {
+    int rd = sys.FindRegister(code.at(1)).Getnumber();
+    int rt = sys.FindRegister(code.at(2)).Getnumber();
     int shame = stoi(code.at(3));
     unsigned int decimal = shame * 64 + rd * 2048 + rt * 65536;
     bitset<32> result(decimal);// 二进制的机器码
     instructions.at(i).machinecode = result;
 }
 
-static void And(vector<string> code, unsigned int i) {
-    int rd = FindNumByName(code.at(1));
-    int rs = FindNumByName(code.at(2));
-    int rt = FindNumByName(code.at(3));
+static void And(vector<string> code, unsigned int i, System& sys) {
+    int rd = sys.FindRegister(code.at(1)).Getnumber();
+    int rs = sys.FindRegister(code.at(2)).Getnumber();
+    int rt = sys.FindRegister(code.at(3)).Getnumber();
     unsigned int decimal = 36 + rd * 2048 + rt * 65536 + rs * 2097152;
     bitset<32> result(decimal);// 二进制的机器码
     instructions.at(i).machinecode = result;
 }
 
-static void Or(vector<string> code, unsigned int i) {
-    int rd = FindNumByName(code.at(1));
-    int rs = FindNumByName(code.at(2));
-    int rt = FindNumByName(code.at(3));
+static void Or(vector<string> code, unsigned int i, System& sys) {
+    int rd = sys.FindRegister(code.at(1)).Getnumber();
+    int rs = sys.FindRegister(code.at(2)).Getnumber();
+    int rt = sys.FindRegister(code.at(3)).Getnumber();
     unsigned int decimal = 37 + rd * 2048 + rt * 65536 + rs * 2097152;
     bitset<32> result(decimal);// 二进制的机器码
     instructions.at(i).machinecode = result;
 }
 
-static void J(vector<string> code, unsigned int i) {
+static void J(vector<string> code, unsigned int i, System& sys) {
     bitset<32> address = FindAddressByName(code.at(1));// 二进制的标签地址
     // 如果指令后的地址是用标签表示的,address不会为null
     if (address == NULL) {// 十进制地址值跳转
@@ -274,20 +274,20 @@ static void J(vector<string> code, unsigned int i) {
     instructions.at(i).machinecode = bitset<32>(result);
 }
 
-static void Jr(vector<string> code, unsigned int i) {
-    int rs = FindNumByName(code.at(1));
+static void Jr(vector<string> code, unsigned int i, System& sys) {
+    int rs = sys.FindRegister(code.at(1)).Getnumber();
     unsigned int decimal = 8 + rs * 2097152;
     bitset<32> result(decimal);// 二进制的机器码
     instructions.at(i).machinecode = bitset<32>(result);
 }
 
 //lw $t0, 0($t1)
-static void Lw(vector<string> code, unsigned int i) {
-    int rt = FindNumByName(code.at(1));
+static void Lw(vector<string> code, unsigned int i, System& sys) {
+    int rt = sys.FindRegister(code.at(1)).Getnumber();
     int startpos = code.at(2).find_first_of('(');// 找出第一个左括号的位置，进而分理出rs
     int endpos = code.at(2).find_last_of(')');// 找出第一个左括号的位置，进而分理出rs
     string rs_s = code.at(2).substr(startpos + 1, endpos - startpos - 1);
-    int rs = FindNumByName(rs_s);
+    int rs = sys.FindRegister(rs_s).Getnumber();
     int offset = stoi(code.at(2).substr(0, startpos));
     unsigned int decimal;
     if (offset >= 0) {
@@ -299,12 +299,12 @@ static void Lw(vector<string> code, unsigned int i) {
     instructions.at(i).machinecode = bitset<32>(result);
 }
 
-static void Sw(vector<string> code, unsigned int i) {
-    int rt = FindNumByName(code.at(1));
+static void Sw(vector<string> code, unsigned int i, System& sys) {
+    int rt = sys.FindRegister(code.at(1)).Getnumber();
     int startpos = code.at(2).find_first_of('(');// 找出第一个左括号的位置，进而分理出rs
     int endpos = code.at(2).find_last_of(')');// 找出第一个左括号的位置，进而分理出rs
     string rs_s = code.at(2).substr(startpos + 1, endpos - startpos - 1);
-    int rs = FindNumByName(rs_s);
+    int rs = sys.FindRegister(rs_s).Getnumber();
     int offset = stoi(code.at(2).substr(0, startpos));
     unsigned int decimal;
     if (offset >= 0) {
@@ -316,9 +316,9 @@ static void Sw(vector<string> code, unsigned int i) {
     instructions.at(i).machinecode = bitset<32>(result);
 }
 
-static void Beq(vector<string> code, unsigned int i) {
-    int rs = FindNumByName(code.at(1));
-    int rt = FindNumByName(code.at(2));
+static void Beq(vector<string> code, unsigned int i, System& sys) {
+    int rs = sys.FindRegister(code.at(1)).Getnumber();
+    int rt = sys.FindRegister(code.at(2)).Getnumber();
     bitset<32> label = FindAddressByName(code.at(3));// 标签对应的二进制地址值
     if (label != NULL) {
         long dec_label = label.to_ulong();

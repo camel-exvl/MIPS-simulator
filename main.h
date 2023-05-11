@@ -32,7 +32,7 @@ public:
     //含参构造函数，接受右值
     Register(int number, std::string&& name, std::bitset<32>&& value) : number{ number }, name{ std::move(name) }, value{ std::move(value) } {}
 
-    std::string GetName() const { return name; }
+    std::string& GetName() const { return name; }
     int Getnumber() const { return number; }
     std::bitset<32> Getvalue() const { return value; }
     

@@ -152,7 +152,7 @@ void System::InstructionJType(const string machineCode)//J型指令只有J，所
     string second = to_string(addr);
     string strPC = first+second+"00";
     bitset<32> bits(strPC);
-    PC.Getvalue()=bits;
+    PC.value=bits;
     //26位后面加00，前面取PC的前4位加起来组成32位   
 }
 
@@ -203,7 +203,7 @@ void System::PcAutoAdd()
 {
     int address=PC.Getvalue().to_ulong()+4;
     bitset<32> addr{ address };
-    PC.Getvalue()=addr;
+    PC.value = addr;
 }
 
 void System::Add(int rs, int rt, int rd)
@@ -242,14 +242,14 @@ void System::Addi(int rs, int rt, int imm)
 
 void System::Jr(int rs)//跳转到指定寄存器存储的地址
 {
-    PC.Getvalue()=FindRegister(rs).Getvalue();
+    PC.value=FindRegister(rs).Getvalue();
 }
 void System::Lw(int rs, int rt, int offset)//lw rt rs offset, rs 加载到rt+offset
 //rs 表示要加载的数据的内存地址所在的寄存器编号，rt 表示目标寄存器编号，offset 表示要加载的数据在内存中的偏移量。
 {
     int address=FindRegister(rs).Getvalue().to_ulong()+offset;
     bitset<32> addr(address);
-    FindRegister(rt).Getvalue()=AccessMemory(addr);
+    FindRegister(rt).value=AccessMemory(addr);
     PcAutoAdd();
 }
 void System::Sw(int rs, int rt, int offset)//sw rt rs offset rt存到rs+offset:给目标地址赋值
@@ -265,7 +265,7 @@ void System::Beq(int rs, int rt, int offset)//beq rt rs offset 如果rt值=rs值
     {
         int address=PC.Getvalue().to_ulong()+offset;
         bitset<32> addr(address);
-        PC.Getvalue()=addr;
+        PC.value = addr;
     }
     else
     PcAutoAdd();
