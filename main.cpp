@@ -3,7 +3,6 @@
 #include <QQmlContext>
 #include <QQuickStyle>
 #include <QFont>
-#include <QFontDatabase>
 
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
@@ -11,7 +10,6 @@ int main(int argc, char *argv[]) {
     QQmlApplicationEngine engine;
 
     QQuickStyle::setStyle("Material");
-    QFontDatabase::addApplicationFont(":MIPS-simulator/fonts/MesloLGM NF.ttf");
     QFont font("Microsoft YaHei", 24);
     app.setFont(font);
 
