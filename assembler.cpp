@@ -16,27 +16,27 @@ string allinstructions[] = {"add", "addi", "sub",
 vector<Instruction> instructions;
 vector<pair<bitset<32>, string>> Lables;//标签库，存储标签的地址及字符串
 
-static void Add(vector<string> code, unsigned int i);
+static void Add(vector<string> code, unsigned int i, System& sys);
 
-static void Addi(vector<string> code, unsigned int i);
+static void Addi(vector<string> code, unsigned int i, System& sys);
 
-static void Sub(vector<string> code, unsigned int i);
+static void Sub(vector<string> code, unsigned int i, System& sys);
 
-static void Sll(vector<string> code, unsigned int i);
+static void Sll(vector<string> code, unsigned int i, System& sys);
 
-static void And(vector<string> code, unsigned int i);
+static void And(vector<string> code, unsigned int i, System& sys);
 
-static void Or(vector<string> code, unsigned int i);
+static void Or(vector<string> code, unsigned int i, System& sys);
 
-static void J(vector<string> code, unsigned int i);
+static void J(vector<string> code, unsigned int i, System& sys);
 
-static void Jr(vector<string> code, unsigned int i);
+static void Jr(vector<string> code, unsigned int i, System& sys);
 
-static void Lw(vector<string> code, unsigned int i);
+static void Lw(vector<string> code, unsigned int i, System& sys);
 
-static void Sw(vector<string> code, unsigned int i);
+static void Sw(vector<string> code, unsigned int i, System& sys);
 
-static void Beq(vector<string> code, unsigned int i);
+static void Beq(vector<string> code, unsigned int i, System& sys);
 
 // int main() {
 //     InitRegister();// 初始化寄存器
