@@ -32,7 +32,7 @@ public:
     //含参构造函数，接受右值
     Register(int number, std::string&& name, std::bitset<32>&& value) : number{ number }, name{ std::move(name) }, value{ std::move(value) } {}
 
-    std::string& GetName() const { return name; }
+    std::string GetName() const { return name; }
     int Getnumber() const { return number; }
     std::bitset<32> Getvalue() const { return value; }
     
@@ -125,6 +125,9 @@ public:
 
     //R型指令
     void InstructionRType(const std::string machineCode);
+
+    //PC地址自动增加
+    void PcAutoAdd();
 
     //各种指令类型对的系统操作
     void Add(int rs, int rt, int rd);

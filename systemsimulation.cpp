@@ -157,11 +157,11 @@ void System::InstructionJType(const string machineCode)//J型指令只有J，所
 }
 
 inline static int complement2int(const bitset<16> complement) {
-    return complement[15] ? -((~complement).to_ulong() + 1) : complement.to_ulong();
+    return complement[15] ? -(int)((~complement).to_ulong() + 1) : complement.to_ulong();
 }
 
 inline static int complement2int(const bitset<32> complement) {
-    return complement[31] ? -((~complement).to_ulong() + 1) : complement.to_ulong();
+    return complement[31] ? -(int((~complement).to_ulong() + 1) : complement.to_ulong();
 }
 
 void System::InstructionIType(const string machineCode)
@@ -202,7 +202,7 @@ void System::JudgeInstruction(const bitset<32>& code)
 void System::PcAutoAdd()
 {
     int address=PC.Getvalue().to_ulong()+4;
-    bitset<32> addr{ address };
+    bitset<32> addr(address);
     PC.value = addr;
 }
 
@@ -236,7 +236,7 @@ void System::Or(int rs, int rt, int rd)
 void System::Addi(int rs, int rt, int imm)
 {
     int temp = complement2int(FindRegister(rs).value) + imm;
-    FindRegister(rt).value = temp >= 0 ? bitset<32>{ temp } : bitset<32>{ (~bitset<32>{ -temp }).to_ulong + 1 };
+    FindRegister(rt).value = temp >= 0 ? bitset<32>(temp) : bitset<32>{ (~bitset<32>(-temp)).to_ulong() + 1 };
     PcAutoAdd();
 }
 
