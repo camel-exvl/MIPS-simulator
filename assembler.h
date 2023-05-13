@@ -13,10 +13,25 @@ public:
             address), assemblecode(assemblecode), machinecode(machinecode) {};
 };
 
+// 汇编
+// Input sys: System系统类 s: 字符串vector集合
+// Output 汇编后的机器指令vector集合
 std::vector<std::bitset<32>> assembler(System& sys, std::vector<std::string> s);
 
+// 汇编
+// Input sys: System系统类 fileName：要读取的汇编代码的文件名
+// Output 汇编后的机器指令vector集合
 std::vector<std::bitset<32>> assemblerOpenFile(System& sys, const std::string& fileName);
 
+// 汇编
+// Input sys: System系统类 s: 字符串vector集合 fileName:用来保存汇编后的机器代码的文件名
+void assemblerToFile(System& sys, std::vector<std::string> s, const std::string& fileName);
+
+
+
+
+
+// 汇编内部函数:
 // 读取汇编码并按空格分隔成vector<string>并去除逗号，
 // 如果第一个子字符串不是要处理的指令码，判断其为标签，去除并加入标签库，处理后的结果插入Instruction
 void InputInsToMap();

@@ -94,6 +94,19 @@ std::vector<std::bitset<32>> assemblerOpenFile(System& sys, const string& fileNa
     return assembler(sys,assemblerCodes);
 }
 
+void assemblerToFile(System& sys, std::vector<std::string> s,const std::string& fileName){
+    ofstream ofs(fileName,ios::out);
+    if (!ofs) {
+        throw "Error: Cannot open the file.";
+    }
+    vector<std::bitset<32>> result;
+    result = assembler(sys,s);
+    for (const auto &item: result){
+        ofs<<item<<endl;
+    }
+    ofs.close();
+}
+
 
 
 // 读取汇编码并按空格分隔成vector<string>并去除逗号，处理标签
