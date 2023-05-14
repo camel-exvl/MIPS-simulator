@@ -10,13 +10,15 @@ Window {
     width: 1024
     height: 768
     visible: true
-    title: qsTr("MIPS-simulator")
+    title: qsTr("MIPS Simulator")
 
     readonly property real dpScale: 1     // 分辨率: 范围(0.8 ~ 2)   还可以添加 PinchArea 指捏缩放
     readonly property real pixelPerDp: Screen.pixelDensity * 0.12
     function dp(x) {
         return x * pixelPerDp * dpScale;
     }
+
+    property url currentFile: ""
 
     MessagePopup {
         id: message
@@ -30,7 +32,9 @@ Window {
             MenuItem {
                 text: qsTr("新建")
                 onTriggered: {
-                    editor.newFile();
+                    window.title = qsTr("MIPS Simulator");
+                    currentFile = "";
+                    edit.text = "";
                 }
             }
             MenuItem {
@@ -42,7 +46,7 @@ Window {
             MenuItem {
                 text: qsTr("保存")
                 onTriggered: {
-                    fileDialog.save();
+                    fileSaveDialog.open();
                 }
             }
             MenuItem {
@@ -219,12 +223,13 @@ Window {
         title: qsTr("打开文件")
         nameFilters: ["源文件 (*.asm)", "二进制文件 (*.bin)"]
         currentFolder: "./"
+        fileMode: FileDialog.OpenFile
         onAccepted: {
             var suffix = selectedFile.toString().split(".").pop();
-            if (suffix == "asm") {
+            if (suffix === "asm") {
                 tabBar.currentIndex = 0;
                 stackLayout.currentIndex = 0;
-            } else if (suffix == "bin") {
+            } else if (suffix === "bin") {
                 tabBar.currentIndex = 1;
                 stackLayout.currentIndex = 1;
             } else {
@@ -238,7 +243,30 @@ Window {
                 message.show(err, "red", 5000);
             }
             function onOpenFileSuccess(text) {
+                currentFile = fileOpenDialog.selectedFile;
+                window.title = "MIPS Simulator - " + fileProcess.getFileName(currentFile);
                 edit.text = text;
+            }
+        }
+    }
+
+    FileDialog {
+        id: fileSaveDialog
+        title: qsTr("保存文件")
+        nameFilters: ["源文件 (*.asm)"]
+        currentFolder: "./"
+        fileMode: FileDialog.SaveFile
+        onAccepted: {
+            fileProcess.saveFile(selectedFile, edit.text);
+        }
+        Connections {
+            target: fileProcess
+            function onFail(err) {
+                message.show(err, "red", 5000);
+            }
+            function onSaveFileSuccess() {
+                currentFile = fileSaveDialog.selectedFile;
+                window.title = "MIPS Simulator - " + fileProcess.getFileName(currentFile);
             }
         }
     }
