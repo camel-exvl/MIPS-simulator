@@ -9,13 +9,15 @@ find_package(Qt6 6.4 REQUIRED COMPONENTS Quick QuickControls2)
 qt_standard_project_setup()
 
 qt_add_executable(appMIPS-simulator
-    main.cpp main.h assembler.cpp assembler.h disassembler.cpp disassembler.h systemsimulation.cpp systemsimulation.h
+    main.cpp main.h 
+    back/assembler.cpp back/assembler.h back/disassembler.cpp back/disassembler.h back/systemsimulation.cpp back/systemsimulation.h
+    middle/FileProcess.h middle/FileProcess.cpp
 )
 
 qt_add_qml_module(appMIPS-simulator
     URI MIPS-simulator
     VERSION 1.0
-    QML_FILES Main.qml MessagePopup.qml
+    QML_FILES front/Main.qml front/MessagePopup.qml
 )
 
 set_target_properties(appMIPS-simulator PROPERTIES

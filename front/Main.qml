@@ -36,7 +36,7 @@ Window {
             MenuItem {
                 text: qsTr("打开")
                 onTriggered: {
-                    fileDialog.open();
+                    fileOpenDialog.open();
                 }
             }
             MenuItem {
@@ -110,6 +110,12 @@ Window {
             }
         }
         Menu {
+            title: qsTr("小工具")
+            // 小工具
+            MenuItem {
+            }
+        }
+        Menu {
             title: qsTr("帮助")
             MenuItem {
                 text: qsTr("关于")
@@ -125,19 +131,16 @@ Window {
         anchors.top: menuBar.bottom
         width: window.width
         height: dp(30)
-        currentIndex: 0
         TabButton {
             text: qsTr("编辑")
             onClicked: {
-                editorTab.visible = true;
-                consoleTab.visible = false;
+                stackLayout.currentIndex = 0;
             }
         }
         TabButton {
             text: qsTr("调试")
             onClicked: {
-                editorTab.visible = false;
-                consoleTab.visible = true;
+                stackLayout.currentIndex = 1;
             }
         }
     }
@@ -184,18 +187,65 @@ Window {
                 }
             }
         }
+
+        Rectangle {
+            id: debugTab
+            visible: false
+
+            Rectangle {
+                id: commandRec
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.bottom: parent.bottom
+                width: parent.width / 3 * 2
+                border.color: "lightgrey"
+                ListView {
+                }
+            }
+
+            Rectangle {
+                id: registerRec
+                anchors.top: parent.top
+                anchors.left: commandRec.right
+                anchors.bottom: parent.bottom
+                width: parent.width / 3
+                border.color: "lightgrey"
+            }
+        }
     }
 
     FileDialog {
-        id: fileDialog
+        id: fileOpenDialog
         title: qsTr("打开文件")
-        nameFilters: ["*.asm"]
+        nameFilters: ["源文件 (*.asm)", "二进制文件 (*.bin)"]
+        currentFolder: "./"
         onAccepted: {
-            editor.open(fileDialog.fileUrl);
+            var suffix = selectedFile.toString().split(".").pop();
+            if (suffix == "asm") {
+                tabBar.currentIndex = 0;
+                stackLayout.currentIndex = 0;
+            } else if (suffix == "bin") {
+                tabBar.currentIndex = 1;
+                stackLayout.currentIndex = 1;
+            } else {
+                message.show("不支持的文件格式");
+            }
+            fileProcess.openFile(selectedFile);
+        }
+        Connections {
+            target: fileProcess
+            function onFail(err) {
+                message.show(err, "red", 5000);
+            }
+            function onOpenFileSuccess(text) {
+                edit.text = text;
+            }
         }
     }
 
     Component.onCompleted: {
-        editor.newFile();
+        edit.clear();
+        tabBar.currentIndex = 0;
+        stackLayout.currentIndex = 0;
     }
 }
