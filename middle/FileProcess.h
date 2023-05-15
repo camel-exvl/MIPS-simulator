@@ -15,7 +15,7 @@ class FileProcess : public QObject {
     Q_INVOKABLE QString getFileName(const QString &fileName);
    signals:
     void openFileSuccess(const QString &text);
-    void saveFileSuccess();
+    void success();
     void fail(const QString &err);
 };
 

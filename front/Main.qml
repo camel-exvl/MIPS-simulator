@@ -4,6 +4,8 @@ import QtCore
 import QtQuick.Controls
 import QtQuick.Dialogs
 import QtQuick.Layouts
+import Qt.labs.qmlmodels
+import CodeTableModel 1.0
 
 Window {
     id: window
@@ -100,11 +102,40 @@ Window {
             MenuItem {
                 text: qsTr("编译")
                 onTriggered: {
+                    if (currentFile === "") {
+                        message.show(qsTr("请先保存文件"), "red", 5000);
+                        return;
+                    }
+                    debug.assemble(system, edit.text, currentFile);
+                }
+                Connections {
+                    target: debug
+                    function onSuccess() {
+                        message.show(qsTr("编译成功"), "green", 5000);
+                    }
+                    function onFail(err) {
+                        message.show(err, "red", 5000);
+                    }
                 }
             }
             MenuItem {
                 text: qsTr("运行")
                 onTriggered: {
+                    if (currentFile === "") {
+                        message.show(qsTr("请先保存文件"), "red", 5000);
+                        return;
+                    }
+                    codeTableModel.initTableFromBinFile(system, currentFile);
+                }
+                Connections {
+                    target: codeTableModel
+                    function onSuccess() {
+                        tabBar.currentIndex = 1;
+                        stackLayout.currentIndex = 1;
+                    }
+                    function onFail(err) {
+                        message.show(err, "red", 5000);
+                    }
                 }
             }
             MenuItem {
@@ -203,7 +234,59 @@ Window {
                 anchors.bottom: parent.bottom
                 width: parent.width / 3 * 2
                 border.color: "lightgrey"
-                ListView {
+                TableView {
+                    anchors.fill: parent
+                    model: codeTableModel
+                    columnWidthProvider: function (column) {
+                        switch (column) {
+                        case 0:
+                            return dp(80);
+                        case 1:
+                            return dp(200);
+                        case 2:
+                            return dp(200);
+                        case 3:
+                            return dp(300);
+                        }
+                    }
+                    delegate: DelegateChooser {
+                        role: "type"
+                        DelegateChoice {
+                            roleValue: CodeTableModel.Boolean
+                            delegate: CheckBox {
+                                checked: model.value
+                            }
+                        }
+                        DelegateChoice {
+                            roleValue: CodeTableModel.String
+                            delegate: Rectangle {
+                                Label {
+                                    anchors.centerIn: parent
+                                    text: model.value
+                                    // font.family: heading ? "Microsoft YaHei" : "Consolas"
+                                    font.pixelSize: dp(30)
+                                    verticalAlignment: Text.AlignVCenter
+                                    horizontalAlignment: Text.AlignHCenter
+                                }
+                            }
+                            // MouseArea {
+                            //     anchors.fill: parent
+                            //     onClicked: {
+                            //         // print value from clicked cell
+                            //         var idx = tableModel.index(row, column);
+                            //         console.log("Clicked cell: ", tableModel.data(idx));
+
+                            //         // print values from all cells in a row
+                            //         console.log("Clicked row: ");
+                            //         for (var i = 0; i < tableModel.columnCount(); i++) {
+                            //             var idx2 = tableModel.index(row, i);
+                            //             var data = tableModel.data(idx2);
+                            //             console.log(data);
+                            //         }
+                            //     }
+                            // }
+                        }
+                    }
                 }
             }
 
@@ -227,15 +310,12 @@ Window {
         onAccepted: {
             var suffix = selectedFile.toString().split(".").pop();
             if (suffix === "asm") {
-                tabBar.currentIndex = 0;
-                stackLayout.currentIndex = 0;
+                fileProcess.openFile(selectedFile);
             } else if (suffix === "bin") {
-                tabBar.currentIndex = 1;
-                stackLayout.currentIndex = 1;
+                codeTableModel.initTableFromBinFile(system, currentFile);
             } else {
                 message.show("不支持的文件格式");
             }
-            fileProcess.openFile(selectedFile);
         }
         Connections {
             target: fileProcess
@@ -246,6 +326,20 @@ Window {
                 currentFile = fileOpenDialog.selectedFile;
                 window.title = "MIPS Simulator - " + fileProcess.getFileName(currentFile);
                 edit.text = text;
+                tabBar.currentIndex = 0;
+                stackLayout.currentIndex = 0;
+            }
+        }
+        Connections {
+            target: codeTableModel
+            function onSuccess() {
+                currentFile = fileOpenDialog.selectedFile;
+                window.title = "MIPS Simulator - " + fileProcess.getFileName(currentFile);
+                tabBar.currentIndex = 1;
+                stackLayout.currentIndex = 1;
+            }
+            function onFail(err) {
+                message.show(err, "red", 5000);
             }
         }
     }
@@ -264,7 +358,7 @@ Window {
             function onFail(err) {
                 message.show(err, "red", 5000);
             }
-            function onSaveFileSuccess() {
+            function onSuccess() {
                 currentFile = fileSaveDialog.selectedFile;
                 window.title = "MIPS Simulator - " + fileProcess.getFileName(currentFile);
             }

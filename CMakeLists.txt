@@ -11,7 +11,7 @@ qt_standard_project_setup()
 qt_add_executable(appMIPS-simulator
     main.cpp main.h 
     back/assembler.cpp back/assembler.h back/disassembler.cpp back/disassembler.h back/systemsimulation.cpp back/systemsimulation.h
-    middle/FileProcess.h middle/FileProcess.cpp
+    middle/FileProcess.h middle/FileProcess.cpp middle/Debug.h middle/Debug.cpp middle/codetablemodel.h middle/codetablemodel.cpp
 )
 
 qt_add_qml_module(appMIPS-simulator

@@ -1,5 +1,7 @@
 #include "FileProcess.h"
 
+using namespace std;
+
 FileProcess::FileProcess(QObject *parent) : QObject{parent} {}
 
 void FileProcess::openFile(const QString &fileName) {
@@ -7,12 +9,12 @@ void FileProcess::openFile(const QString &fileName) {
         QUrl url{fileName};
         QFile file{url.toLocalFile()};
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            throw std::runtime_error{"文件打开失败"};
+            throw runtime_error{"文件打开失败"};
         }
         QTextStream in{&file};
         QString text{in.readAll()};
         emit openFileSuccess(text);
-    } catch (std::exception &e) {
+    } catch (exception &e) {
         emit fail(QString{e.what()});
     }
 }
@@ -27,12 +29,12 @@ void FileProcess::saveFile(const QString &fileName, const QString &text) {
         QUrl url{fileName};
         QFile file{url.toLocalFile()};
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            throw std::runtime_error{"文件写入失败"};
+            throw runtime_error{"文件写入失败"};
         }
         QTextStream out{&file};
         out << text;
-        emit saveFileSuccess();
-    } catch (std::exception &e) {
+        emit success();
+    } catch (exception &e) {
         emit fail(QString{e.what()});
     }
 }

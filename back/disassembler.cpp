@@ -35,7 +35,7 @@ vector<string> disassembler(System& sys, vector<bitset<32>> s) {
     return instructions;
 }
 
-vector<string> disassemblerOpenFile(System& sys, const string& fileName) {
+vector<pair<string, string>> disassemblerOpenFile(System& sys, const string& fileName) {
     ifstream fin(fileName, ios::binary);
     if (!fin) {
         throw "Error: Cannot open the file.";
@@ -46,6 +46,7 @@ vector<string> disassemblerOpenFile(System& sys, const string& fileName) {
         throw "Error: The file is not a valid MIPS binary file.";
     }
     fin.seekg(0, ios::beg);
+    vector<pair<string, string>> result;
     vector<bitset<32>> machineCodes;
     bitset<32> machineCode;
     char ch;
@@ -59,9 +60,14 @@ vector<string> disassemblerOpenFile(System& sys, const string& fileName) {
             }
         }
         machineCodes.push_back(machineCode);
+        stringstream ss;
+        ss << hex << machineCode.to_ulong();
+        result.push_back(make_pair("0x" + ss.str(), disassembler(sys, machineCodes).back()));
+        machineCode.reset();
+        machineCodes.clear();
     }
     fin.close();
-    return disassembler(sys, machineCodes);
+    return result;
 }
 
 inline static int complement2int(const bitset<16> complement) {

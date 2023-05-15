@@ -5,6 +5,8 @@
 #include <QFont>
 #include "main.h"
 #include "middle/fileprocess.h"
+#include "middle/debug.h"
+#include "middle/codetablemodel.h"
 
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
@@ -12,7 +14,13 @@ int main(int argc, char *argv[]) {
     QQmlApplicationEngine engine;
     System system;
     FileProcess fileProcess;
+    Debug debug;
+    CodeTableModel codeTableModel;
+    engine.rootContext()->setContextProperty("system", QVariant::fromValue(system));
     engine.rootContext()->setContextProperty("fileProcess", &fileProcess);
+    engine.rootContext()->setContextProperty("debug", &debug);
+    engine.rootContext()->setContextProperty("codeTableModel", &codeTableModel);
+    qmlRegisterType<CodeTableModel>("CodeTableModel", 1, 0, "CodeTableModel");
 
     QQuickStyle::setStyle("Material");
     QFont font("Microsoft YaHei", 24);

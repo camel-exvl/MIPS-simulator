@@ -102,7 +102,7 @@ void assemblerToFile(System& sys, std::vector<std::string> s,const std::string& 
     vector<std::bitset<32>> result;
     result = assembler(sys,s);
     for (const auto &item: result){
-        ofs<<item<<endl;
+        ofs<<item;
     }
     ofs.close();
 }
