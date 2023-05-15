@@ -5,9 +5,14 @@ void CodeTableModel::initTableFromBinFile(System sys, const QString &fileName) {
     try {
         QUrl url{fileName};
         QFile file{url.toLocalFile()};
-        QString newFileName = file.fileName().replace(".asm", ".bin");
+        if (!file.exists()) {
+            throw std::runtime_error{"请先编译文件"};
+        }
+        if (!file.open(QIODevice::ReadOnly)) {
+            throw std::runtime_error{"无法打开文件"};
+        }
         std::vector<std::pair<std::string, std::string>> originCode =
-            disassemblerOpenFile(sys, newFileName.toStdString());
+            disassemblerOpenFile(sys, url.toLocalFile().toStdString());
         QVector<std::pair<QString, QString>> code;
         for (auto &i : originCode) {
             code.push_back({QString::fromStdString(i.first), QString::fromStdString(i.second)});
