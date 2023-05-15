@@ -95,15 +95,14 @@ std::vector<std::bitset<32>> assemblerOpenFile(System& sys, const string& fileNa
 }
 
 void assemblerToFile(System& sys, std::vector<std::string> s,const std::string& fileName){
-    ofstream ofs(fileName,ios::out);
+    ofstream ofs(fileName,ios::binary);
     if (!ofs) {
         throw "Error: Cannot open the file.";
     }
     vector<std::bitset<32>> result;
     result = assembler(sys,s);
     for (const auto &item: result){
-        unsigned long temp = item.to_ulong();
-        ofs<<temp;
+        ofs<<item;
     }
     ofs.close();
 }
