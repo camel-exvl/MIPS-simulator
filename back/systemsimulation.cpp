@@ -8,7 +8,7 @@ void System::InitRegister()
 {
     bitset<32> b(0);
     registers.at(0) = Register{ 0, "$zero", b };  // 插入$zero
-    registers.at(1) = Register{ 1, "at", b };  // 插入$at
+    registers.at(1) = Register{ 1, "$at", b };  // 插入$at
     for (int i = 2; i < 4; i++) {
         registers.at(i) = Register{ i, "$v" + to_string(i - 2), b };
         // 插入$v0-%v1

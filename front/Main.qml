@@ -26,6 +26,162 @@ Window {
         id: message
     }
 
+    TabBar {
+        id: tabBar
+        anchors.top: menuBar.bottom
+        width: window.width
+        height: dp(30)
+        TabButton {
+            text: qsTr("编辑")
+            onClicked: {
+                stackLayout.currentIndex = 0;
+            }
+        }
+        TabButton {
+            text: qsTr("调试")
+            onClicked: {
+                stackLayout.currentIndex = 1;
+            }
+        }
+    }
+
+    StackLayout {
+        id: stackLayout
+        anchors.top: tabBar.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.topMargin: tabBar.contentHeight
+
+        Rectangle {
+            id: editorTab
+            border.color: "lightgrey"
+            Flickable {
+                id: flick
+                anchors.fill: parent
+                contentWidth: edit.contentWidth
+                contentHeight: edit.contentHeight
+                clip: true
+
+                function ensureVisible(r) {
+                    if (contentX >= r.x)
+                        contentX = r.x;
+                    else if (contentX + width <= r.x + r.width)
+                        contentX = r.x + r.width - width;
+                    if (contentY >= r.y)
+                        contentY = r.y;
+                    else if (contentY + height <= r.y + r.height)
+                        contentY = r.y + r.height - height;
+                }
+
+                TextEdit {
+                    id: edit
+                    width: flick.width
+                    height: flick.height
+                    focus: true
+                    wrapMode: TextEdit.Wrap
+                    font.family: "Consolas"
+                    font.pixelSize: dp(30)
+                    selectByMouse: true
+                    onCursorRectangleChanged: flick.ensureVisible(cursorRectangle)
+                }
+            }
+        }
+
+        Rectangle {
+            id: debugTab
+            visible: false
+
+            Rectangle {
+                id: commandRec
+                anchors.top: parent.top
+                anchors.left: parent.left
+                height: parent.height / 3 * 2
+                width: parent.width / 3 * 2
+                border.color: "lightgrey"
+                TableView {
+                    anchors.fill: parent
+                    model: codeTableModel
+                    boundsBehavior: Flickable.StopAtBounds
+                    columnWidthProvider: function (column) {
+                        switch (column) {
+                        case 0:
+                            return dp(80);
+                        case 1:
+                            return dp(200);
+                        case 2:
+                            return dp(200);
+                        case 3:
+                            return dp(300);
+                        }
+                    }
+                    delegate: DelegateChooser {
+                        role: "type"
+                        DelegateChoice {
+                            roleValue: CodeTableModel.Boolean
+                            delegate: CheckBox {
+                                checked: model.value
+                            }
+                        }
+                        DelegateChoice {
+                            roleValue: CodeTableModel.String
+                            delegate: Rectangle {
+                                Label {
+                                    anchors.centerIn: parent
+                                    text: model.value
+                                    // font.family: heading ? "Microsoft YaHei" : "Consolas"
+                                    font.pixelSize: dp(30)
+                                    horizontalAlignment: Text.AlignLeft
+                                    width: parent.width
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Rectangle {
+                id: registerRec
+                anchors.top: parent.top
+                anchors.left: commandRec.right
+                anchors.bottom: parent.bottom
+                width: parent.width / 3
+                border.color: "lightgrey"
+                TableView {
+                    anchors.fill: parent
+                    model: registerTableModel
+                    boundsBehavior: Flickable.StopAtBounds
+                    columnWidthProvider: function (column) {
+                        switch (column) {
+                        case 0:
+                            return dp(100);
+                        case 1:
+                            return dp(100);
+                        case 2:
+                            return dp(200);
+                        }
+                    }
+                    delegate: Rectangle {
+                        Label {
+                            anchors.centerIn: parent
+                            text: model.value
+                            font.pixelSize: dp(30)
+                            horizontalAlignment: Text.AlignLeft
+                            width: parent.width
+                        }
+                    }
+                }
+            }
+            Rectangle {
+                id: memoryRec
+                anchors.top: commandRec.bottom
+                anchors.left: parent.left
+                anchors.right: registerRec.left
+                height: parent.height / 3
+                border.color: "lightgrey"
+            }
+        }
+    }
+
     MenuBar {
         id: menuBar
         width: window.width
@@ -157,146 +313,6 @@ Window {
                 onTriggered: {
                     aboutDialog.open();
                 }
-            }
-        }
-    }
-
-    TabBar {
-        id: tabBar
-        anchors.top: menuBar.bottom
-        width: window.width
-        height: dp(30)
-        TabButton {
-            text: qsTr("编辑")
-            onClicked: {
-                stackLayout.currentIndex = 0;
-            }
-        }
-        TabButton {
-            text: qsTr("调试")
-            onClicked: {
-                stackLayout.currentIndex = 1;
-            }
-        }
-    }
-
-    StackLayout {
-        id: stackLayout
-        anchors.top: tabBar.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.topMargin: tabBar.contentHeight
-
-        Rectangle {
-            id: editorTab
-            border.color: "lightgrey"
-            Flickable {
-                id: flick
-                anchors.fill: parent
-                contentWidth: edit.contentWidth
-                contentHeight: edit.contentHeight
-                clip: true
-
-                function ensureVisible(r) {
-                    if (contentX >= r.x)
-                        contentX = r.x;
-                    else if (contentX + width <= r.x + r.width)
-                        contentX = r.x + r.width - width;
-                    if (contentY >= r.y)
-                        contentY = r.y;
-                    else if (contentY + height <= r.y + r.height)
-                        contentY = r.y + r.height - height;
-                }
-
-                TextEdit {
-                    id: edit
-                    width: flick.width
-                    height: flick.height
-                    focus: true
-                    wrapMode: TextEdit.Wrap
-                    font.family: "Consolas"
-                    font.pixelSize: dp(30)
-                    selectByMouse: true
-                    onCursorRectangleChanged: flick.ensureVisible(cursorRectangle)
-                }
-            }
-        }
-
-        Rectangle {
-            id: debugTab
-            visible: false
-
-            Rectangle {
-                id: commandRec
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.bottom: parent.bottom
-                width: parent.width / 3 * 2
-                border.color: "lightgrey"
-                TableView {
-                    anchors.fill: parent
-                    model: codeTableModel
-                    columnWidthProvider: function (column) {
-                        switch (column) {
-                        case 0:
-                            return dp(80);
-                        case 1:
-                            return dp(200);
-                        case 2:
-                            return dp(200);
-                        case 3:
-                            return dp(300);
-                        }
-                    }
-                    delegate: DelegateChooser {
-                        role: "type"
-                        DelegateChoice {
-                            roleValue: CodeTableModel.Boolean
-                            delegate: CheckBox {
-                                checked: model.value
-                            }
-                        }
-                        DelegateChoice {
-                            roleValue: CodeTableModel.String
-                            delegate: Rectangle {
-                                Label {
-                                    anchors.centerIn: parent
-                                    text: model.value
-                                    // font.family: heading ? "Microsoft YaHei" : "Consolas"
-                                    font.pixelSize: dp(30)
-                                    verticalAlignment: Text.AlignVCenter
-                                    horizontalAlignment: Text.AlignHCenter
-                                }
-                            }
-                            // MouseArea {
-                            //     anchors.fill: parent
-                            //     onClicked: {
-                            //         // print value from clicked cell
-                            //         var idx = tableModel.index(row, column);
-                            //         console.log("Clicked cell: ", tableModel.data(idx));
-
-                            //         // print values from all cells in a row
-                            //         console.log("Clicked row: ");
-                            //         for (var i = 0; i < tableModel.columnCount(); i++) {
-                            //             var idx2 = tableModel.index(row, i);
-                            //             var data = tableModel.data(idx2);
-                            //             console.log(data);
-                            //         }
-                            //     }
-                            // }
-                        }
-                    }
-                }
-            }
-
-            Rectangle {
-                id: registerRec
-                anchors.top: parent.top
-                anchors.left: commandRec.right
-                anchors.bottom: parent.bottom
-                width: parent.width / 3
-                border.color: "lightgrey"
             }
         }
     }
