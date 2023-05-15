@@ -95,8 +95,8 @@ std::vector<std::bitset<32>> assemblerOpenFile(System& sys, const string& fileNa
 }
 
 void assemblerToFile(System& sys, std::vector<std::string> s,const std::string& fileName){
-    ofstream ofs(fileName,ios::binary);
-    if (!ofs) {
+    ofstream ofs(fileName, ios::out | ios::binary);
+    if (!ofs.is_open()) {
         throw "Error: Cannot open the file.";
     }
     vector<std::bitset<32>> result;
@@ -105,7 +105,7 @@ void assemblerToFile(System& sys, std::vector<std::string> s,const std::string& 
         string temp = item.to_string();
         for (char i: temp) {
             int temp_int = (int) i - 48;
-            ofs << temp_int;
+            ofs.write((char *)&temp_int, sizeof (temp_int));
         }
     }
     ofs.close();
