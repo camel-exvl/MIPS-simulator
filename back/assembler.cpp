@@ -101,8 +101,12 @@ void assemblerToFile(System& sys, std::vector<std::string> s,const std::string& 
     }
     vector<std::bitset<32>> result;
     result = assembler(sys,s);
-    for (const auto &item: result){
-        ofs<<item;
+    for (const auto &item: result) {
+        string temp = item.to_string();
+        for (char i: temp) {
+            int temp_int = (int) i - 48;
+            ofs << temp_int;
+        }
     }
     ofs.close();
 }
