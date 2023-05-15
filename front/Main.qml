@@ -278,10 +278,10 @@ Window {
                 text: qsTr("运行")
                 onTriggered: {
                     if (currentFile === "") {
-                        message.show(qsTr("请先保存文件"), "red", 5000);
+                        message.show(qsTr("请先保存/编译文件"), "red", 5000);
                         return;
                     }
-                    codeTableModel.initTableFromBinFile(system, currentFile);
+                    codeTableModel.initTableFromBinFile(system, String(currentFile).replace(".asm", ".bin"))
                 }
                 Connections {
                     target: codeTableModel
