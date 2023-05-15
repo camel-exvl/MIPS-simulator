@@ -8,6 +8,7 @@
 #include "middle/debug.h"
 #include "middle/codetablemodel.h"
 #include "middle/registertablemodel.h"
+#include "middle/memorytablemodel.h"
 
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
@@ -18,12 +19,15 @@ int main(int argc, char *argv[]) {
     Debug debug;
     CodeTableModel codeTableModel;
     RegisterTableModel registerTableModel;
+    MemoryTableModel memoryTableModel;
     registerTableModel.initTable(system);
+    memoryTableModel.initTable(system);
     engine.rootContext()->setContextProperty("system", QVariant::fromValue(system));
     engine.rootContext()->setContextProperty("fileProcess", &fileProcess);
     engine.rootContext()->setContextProperty("debug", &debug);
     engine.rootContext()->setContextProperty("codeTableModel", &codeTableModel);
     engine.rootContext()->setContextProperty("registerTableModel", &registerTableModel);
+    engine.rootContext()->setContextProperty("memoryTableModel", &memoryTableModel);
     qmlRegisterType<CodeTableModel>("CodeTableModel", 1, 0, "CodeTableModel");
 
     QQuickStyle::setStyle("Material");

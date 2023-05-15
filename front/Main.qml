@@ -9,8 +9,8 @@ import CodeTableModel 1.0
 
 Window {
     id: window
-    width: 1024
-    height: 768
+    width: 1600
+    height: 900
     visible: true
     title: qsTr("MIPS Simulator")
 
@@ -88,19 +88,22 @@ Window {
             }
         }
 
-        Rectangle {
+        Grid {
             id: debugTab
-            visible: false
-
+            columns: 2
+            rows: 2
+            anchors.fill: parent
+            anchors.centerIn: parent
             Rectangle {
                 id: commandRec
-                anchors.top: parent.top
-                anchors.left: parent.left
                 height: parent.height / 3 * 2
-                width: parent.width / 3 * 2
+                width: parent.width / 5 * 4
                 border.color: "lightgrey"
                 TableView {
-                    anchors.fill: parent
+                    id: commandTable
+                    anchors.centerIn: parent
+                    height: parent.height * 0.9
+                    width: parent.width * 0.9
                     model: codeTableModel
                     boundsBehavior: Flickable.StopAtBounds
                     columnWidthProvider: function (column) {
@@ -141,13 +144,14 @@ Window {
             }
             Rectangle {
                 id: registerRec
-                anchors.top: parent.top
-                anchors.left: commandRec.right
-                anchors.bottom: parent.bottom
-                width: parent.width / 3
+                height: parent.height / 3 * 2
+                width: parent.width / 5
                 border.color: "lightgrey"
                 TableView {
-                    anchors.fill: parent
+                    id: registerTable
+                    anchors.centerIn: parent
+                    height: parent.height * 0.9
+                    width: parent.width * 0.9
                     model: registerTableModel
                     boundsBehavior: Flickable.StopAtBounds
                     columnWidthProvider: function (column) {
@@ -173,11 +177,43 @@ Window {
             }
             Rectangle {
                 id: memoryRec
-                anchors.top: commandRec.bottom
-                anchors.left: parent.left
-                anchors.right: registerRec.left
                 height: parent.height / 3
+                width: parent.width / 5 * 4
                 border.color: "lightgrey"
+                TableView {
+                    id: memoryTable
+                    anchors.centerIn: parent
+                    height: parent.height * 0.9
+                    width: parent.width * 0.9
+                    model: memoryTableModel
+                    boundsBehavior: Flickable.StopAtBounds
+                    columnWidthProvider: function (column) {
+                        switch (column) {
+                        case 0:
+                            return dp(200);
+                        case 1:
+                        case 2:
+                        case 3:
+                        case 4:
+                        case 5:
+                        case 6:
+                        case 7:
+                        case 8:
+                        case 9:
+                        case 10:
+                            return dp(200);
+                        }
+                    }
+                    delegate: Rectangle {
+                        Label {
+                            anchors.centerIn: parent
+                            text: model.value
+                            font.pixelSize: dp(30)
+                            horizontalAlignment: Text.AlignLeft
+                            width: parent.width
+                        }
+                    }
+                }
             }
         }
     }
@@ -275,13 +311,13 @@ Window {
                 }
             }
             MenuItem {
-                text: qsTr("运行")
+                text: qsTr("调试")
                 onTriggered: {
                     if (currentFile === "") {
                         message.show(qsTr("请先保存/编译文件"), "red", 5000);
                         return;
                     }
-                    codeTableModel.initTableFromBinFile(system, String(currentFile).replace(".asm", ".bin"))
+                    codeTableModel.initTableFromBinFile(system, String(currentFile).replace(".asm", ".bin"));
                 }
                 Connections {
                     target: codeTableModel
@@ -292,6 +328,11 @@ Window {
                     function onFail(err) {
                         message.show(err, "red", 5000);
                     }
+                }
+            }
+            MenuItem {
+                text: qsTr("运行")
+                onTriggered: {
                 }
             }
             MenuItem {
