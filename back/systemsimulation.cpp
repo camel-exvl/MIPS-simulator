@@ -271,3 +271,125 @@ void System::Beq(int rs, int rt, int offset)//beq rt rs offset 如果rt值=rs值
     else
     PcAutoAdd();
 }
+
+std::bitset<32> turnIntToTruecode(int number)
+{
+    bitset<32> num(number);
+    if (number < 0) {
+        num = num.flip();
+        for (int i = 0; i < 31; ++i) {
+            num[i] = !num[i];
+            if (num[i] == 1) {
+                break;
+            }
+        }
+        num[31]=1;
+    }
+    return num;
+}
+
+std::bitset<32> turnIntToComplementcode(int number)
+{
+    bitset<32> num(number);
+    return num;
+}
+
+std::bitset<32> turnFloatToTruecode(float number)
+{
+    unsigned int intValue = *reinterpret_cast<unsigned int*>(&number);
+    return bitset<32>(intValue);
+}
+
+std::bitset<32> turnFloatToComplementcode(float number)
+{
+    if(number>=0)
+    return turnFloatToTruecode(number);
+    else
+    {
+        bitset<32> num = turnFloatToTruecode(number);
+        num = num.flip();
+        for (int i = 0; i < 31; ++i) {
+            num[i] = !num[i];
+            if (num[i] == 1) {
+                break;
+            }
+        }
+        num[31]=1;
+        return num;
+    }
+
+}
+
+int getPriority(char op) {
+    if (op == '+' || op == '-') {
+        return 1;
+    } else if (op == '*' || op == '/') {
+        return 2;
+    } else {
+        return 0;
+    }
+}
+
+std::vector<std::string> toRPN(std::string s) {
+    std::map<char, int> priority;
+    priority['+'] = 1;
+    priority['-'] = 1;
+    priority['*'] = 2;
+    priority['/'] = 2;
+    std::stack<char> stack;
+    std::vector<std::string> rpn;
+    std::string number;
+
+    if (s[0] == '-') {
+        number += s[0];
+    }
+
+    for (int i = (s[0] == '-') ? 1 : 0; i < s.size(); ++i) {
+        if (isdigit(s[i]) || s[i] == '.') {
+            number += s[i];
+        } else {
+            if (s[i] == '-' && s[i - 1] != ')' && !isdigit(s[i - 1])) {
+                number += s[i];
+                continue;
+            }
+            if (!number.empty()) {
+                rpn.push_back(number);
+                number = "";
+            }
+            while (!stack.empty() && getPriority(s[i]) <= getPriority(stack.top())) {
+                rpn.push_back(std::string(1, stack.top()));
+                stack.pop();
+            }
+            stack.push(s[i]);
+        }
+    }
+    if (!number.empty()) {
+        rpn.push_back(number);
+    }
+    while (!stack.empty()) {
+        rpn.push_back(std::string(1, stack.top()));
+        stack.pop();
+    }
+    return rpn;
+}
+
+double calculateRPN(std::vector<std::string> rpn) {
+    std::stack<double> stack;
+    for (const auto &s : rpn) {
+        if (isdigit(s[0]) || s[0] == '-' || s.size() > 1) {
+            stack.push(stod(s));
+        } else {
+            double right = stack.top();
+            stack.pop();
+            double left = stack.top();
+            stack.pop();
+            switch (s[0]) {
+                case '+': stack.push(left + right); break;
+                case '-': stack.push(left - right); break;
+                case '*': stack.push(left * right); break;
+                case '/': stack.push(left / right); break;
+            }
+        }
+    }
+    return stack.top();
+}
