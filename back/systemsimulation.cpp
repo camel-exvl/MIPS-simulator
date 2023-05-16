@@ -39,10 +39,6 @@ void System::InitRegister()
     registers.at(31) = Register{ 31, "$ra", b };  // 插入$ra
 }
 
-void System::InitMemory()   
-{
-    
-}
 
 //根据编号找到寄存器并返回寄存器类
 Register& System::FindRegister(int number)
@@ -80,7 +76,7 @@ bitset<32>& System::AccessMemory(const bitset<32>& address)
     //代码段，返回机器指令
     else if (address.to_ulong() < 0x10000000)
     {
-        if (address.to_ulong() < mem.texttop.to_ulong())//<=?//
+        if (address.to_ulong() < mem.texttop.to_ulong())//如果访问内存空代码段报错
             return mem.text_segment.at(address.to_ulong());
         else
         {
@@ -124,6 +120,28 @@ void System::PrintSystem() const
     //看后期要不要做图形界面
 }
 
+//单步执行内存中的指令
+void System::OneStepExecute()
+{
+    if (PC.Getvalue() == mem.texttop)
+    {
+        cout << "已执行完所有指令" << endl;
+        return;
+    }
+    const bitset<32>& code = AccessMemory(PC.Getvalue());
+    JudgeInstruction(code);
+}
+
+//执行内存中的指令至断点
+void System::BreakPointExecute(const bitset<32> address)
+{
+    while (PC.Getvalue().to_ulong() < address.to_ulong())
+    {
+        OneStepExecute();
+    }
+}
+
+//R型指令
 void System::InstructionRType(const string machineCode)
 {
     int rs = stoi(machineCode.substr(6, 5), nullptr, 2);
@@ -145,6 +163,7 @@ void System::InstructionRType(const string machineCode)
     Jr(rs);
 }
 
+//J型指令
 void System::InstructionJType(const string machineCode)//J型指令只有J，所以直接判断即可
 {
     int addr = stoi(machineCode.substr(6, 26), nullptr, 2);
@@ -165,6 +184,7 @@ inline static int complement2int(const bitset<32> complement) {
     return complement[31] ? -(int)((~complement).to_ulong() + 1) : complement.to_ulong();
 }
 
+//I型指令
 void System::InstructionIType(const string machineCode)
 {
     int op = stoi(machineCode.substr(0, 6), nullptr, 2);
@@ -182,6 +202,7 @@ void System::InstructionIType(const string machineCode)
     Beq(rs,rt,imm);
 }
 
+//判断指令类型
 void System::JudgeInstruction(const bitset<32>& code)
 {
     string machinecode=code.to_string();
