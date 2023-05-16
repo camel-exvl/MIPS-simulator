@@ -57,9 +57,9 @@ private:
 
 public:
     //默认构造函数，初始化内存地址
-    Memory() :text_segment{ make_pair(0x00400000,std::bitset<32>{}) },
-        data_segment{ make_pair(0x10000000,std::bitset<32>{}) },
-        stack_segment{ make_pair(0x7ffffffc,std::bitset<32>{}) }, texttop{ 0x00400000 } {};
+    Memory() :text_segment{ make_pair(0x00400000,std::bitset<32>{0}) },
+        data_segment{ make_pair(0x10000000,std::bitset<32>{0}) },
+        stack_segment{ make_pair(0x7ffffffc,std::bitset<32>{0}) }, texttop{ 0x00400000 } {}
 
     friend class System;
 };
@@ -72,6 +72,8 @@ public:
 //bitset<32>& AccessMemory(const bitset<32>& address)   --> 输入地址访问内存返回存储内容
 //void PushCodeToMemory(const bitset<32>& code)         --> 向内存代码段增加代码
 //void PrintSystem() const                              --> 输出系统状态
+//void OneStepExecute()                                 --> 单步执行内存中的指令
+//void BreakPointExecute(const bitset<32> address)      --> 执行内存中的指令至断点
 //****************************************错误******************************************
 //FindRegister时寄存器不存在
 //AccessMemory中访问错误的内存地址
@@ -89,14 +91,11 @@ public:
     {
         PC.value = std::bitset <32>{ 0x00400000 };
         InitRegister();
-        InitMemory();
     }
 
 private:
     //初始化寄存器组
     void InitRegister();
-    //将代码全部存入内存部分
-    void InitMemory();
 
 public:
     //根据编号找到寄存器并返回寄存器类
@@ -114,6 +113,13 @@ public:
     //显示内存状态
     void PrintSystem() const;
 
+    //单步执行内存中的指令
+    void OneStepExecute();
+
+    //执行内存中的指令至断点
+    void BreakPointExecute(const bitset<32> address);
+
+private:
     //判断指令类型
     void JudgeInstruction(const std::bitset<32>& code);
     
@@ -137,8 +143,7 @@ public:
     void And(int rs, int rt, int rd);
     void Or(int rs, int rt, int rd);
     void Jr(int rs);//
-    void Lw(int rs, int rt, int offset);//
-    void Sw(int rs, int rt, int offset);//
-    void Beq(int rs, int rt, int offset);//
-
+    void Lw(int rs, int rt, int offset);
+    void Sw(int rs, int rt, int offset);
+    void Beq(int rs, int rt, int offset);
 };
