@@ -54,12 +54,13 @@ private:
     std::map<unsigned long, std::bitset<32>> data_segment;//数据段，储存静态数据，地址从0x10000000开始往上增长
     std::map<unsigned long, std::bitset<32>> stack_segment;//堆栈段，地址从0x7ffffffc开始往下递减
     std::bitset<32> texttop;//指向代码段的空内存的最小地址
+    std::bitset<32> datatop;//指向数据段的空内存的最小地址
 
 public:
     //默认构造函数，初始化内存地址
     Memory() :text_segment{ make_pair(0x00400000,std::bitset<32>{0}) },
         data_segment{ make_pair(0x10000000,std::bitset<32>{0}) },
-        stack_segment{ make_pair(0x7ffffffc,std::bitset<32>{0}) }, texttop{ 0x00400000 } {}
+        stack_segment{ make_pair(0x7ffffffc,std::bitset<32>{0}) }, texttop{ 0x00400000 }, datatop{ 0x10000000 } {}
 
     friend class System;
 };
@@ -84,6 +85,7 @@ private:
     Memory mem;//内存
     std::vector<Register> registers{ 32 };//寄存器组
     Register PC;//程序计数器
+    std::map<unsigned long, bool> breakpoints;//存储指令执行的断点信息
 
 public:
     //默认构造函数
@@ -114,10 +116,16 @@ public:
     void PrintSystem() const;
 
     //单步执行内存中的指令
-    void OneStepExecute();
+    std::bitset<32> OneStepExecute();
+
+    //添加断点
+    void AddBreakPoint(const std::bitset<32> address);
+
+    //删除断点
+    void RemoveBreakPoint(const std::bitset<32> address);
 
     //执行内存中的指令至断点
-    void BreakPointExecute(const std::bitset<32> address);
+    std::bitset<32> BreakPointExecute();
 
 private:
     //判断指令类型

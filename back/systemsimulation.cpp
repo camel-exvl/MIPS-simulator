@@ -76,23 +76,31 @@ bitset<32>& System::AccessMemory(const bitset<32>& address)
     //代码段，返回机器指令
     else if (address.to_ulong() < 0x10000000)
     {
-        if (address.to_ulong() < mem.texttop.to_ulong())//如果访问内存空代码段报错
+        if (address.to_ulong() < mem.texttop.to_ulong())
             return mem.text_segment.at(address.to_ulong());
-        else
+        else//如果访问内存空代码段报错
         {
             cerr << "该地址没有代码存储，不允许访问" << endl;
             exit(-1);
         }
     }
-    //数据段，返回存储数据
-    else if (address.to_ulong() < registers.at(29).value.to_ulong())
-    {
-        return mem.data_segment.at(address.to_ulong());
-    }
-    //堆栈段，返回堆栈数据
     else if (address.to_ulong() < 0x7fffffff)
     {
-        return mem.stack_segment[address.to_ulong()];
+        //数据段，返回存储数据
+        if (address.to_ulong() < mem.datatop.to_ulong())
+        {
+            return mem.data_segment.at(address.to_ulong());
+        }
+        //堆栈段，返回堆栈数据
+        else if (address.to_ulong() >= registers.at(29).value.to_ulong())
+        {
+            return mem.stack_segment.at(address.to_ulong());
+        }
+        else//如果访问数据段与堆栈段之间的空内存报错
+        {
+            cerr << "该地址没有内容存储，不允许访问" << endl;
+            exit(-1);
+        }
     }
     //地址越界报错
     else
@@ -121,25 +129,41 @@ void System::PrintSystem() const
 }
 
 //单步执行内存中的指令
-void System::OneStepExecute()
+bitset<32> System::OneStepExecute()
 {
     if (PC.Getvalue() == mem.texttop)
     {
-        cout << "已执行完所有指令" << endl;
-        return;
+        cerr << "已执行完所有指令" << endl;
+        return PC.Getvalue();
     }
     const bitset<32>& code = AccessMemory(PC.Getvalue());
     JudgeInstruction(code);
+    return PC.Getvalue();
+}
+
+//添加断点
+void System::AddBreakPoint(const bitset<32> address)
+{
+    breakpoints[address.to_ulong()] = true;
+}
+
+//删除断点
+void System::RemoveBreakPoint(const std::bitset<32> address)
+{
+    breakpoints[address.to_ulong()] = false;
 }
 
 //执行内存中的指令至断点
-void System::BreakPointExecute(const bitset<32> address)
+bitset<32> System::BreakPointExecute()
 {
-    while (PC.Getvalue().to_ulong() < address.to_ulong())
+    //若当前指令不是断点就继续执行
+    while (breakpoints[PC.Getvalue().to_ulong()] == false)
     {
         OneStepExecute();
     }
+    return PC.Getvalue();
 }
+
 
 //R型指令
 void System::InstructionRType(const string machineCode)
