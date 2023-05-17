@@ -315,6 +315,12 @@ std::bitset<32> turnIntToComplementcode(int number)
     return num;
 }
 
+int turnComplementToInt(bitset<32> complement)
+{
+    int num=static_cast<int>(complement.to_ulong());
+    return num;
+}
+
 std::bitset<32> turnFloatToTruecode(float number)
 {
     unsigned int intValue = *reinterpret_cast<unsigned int*>(&number);
@@ -339,6 +345,11 @@ std::bitset<32> turnFloatToComplementcode(float number)
         return num;
     }
 
+}
+
+std::bitset<64> turnDoubleToComplementcode(double number)
+{
+    return std::bitset<64>(*reinterpret_cast<long long*>(&number));
 }
 
 int getPriority(char op) {

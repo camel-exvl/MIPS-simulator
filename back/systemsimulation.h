@@ -11,13 +11,19 @@ std::bitset<32> turnIntToTruecode(int number);
 //整数转补码
 std::bitset<32> turnIntToComplementcode(int number);
 
+//补码转整数
+int turnComplementToInt(bitset<32> complement);
+
 //浮点数转原码
 std::bitset<32> turnFloatToTruecode(float number);
 
-//浮点数转补码
+//浮点数转单精度表示
 std::bitset<32> turnFloatToComplementcode(float number);
 
-int getPriority(char op);
+//浮点数转双精度表示
+std::bitset<64> turnDoubleToComplementcode(double number);
+
+int getPriority(char op);//获取传入运算符的优先级
 
 std::vector<std::string> toRPN(std::string s);//传入字符串将中缀表达式转为后缀表达式
 
