@@ -73,8 +73,10 @@ public:
 //bitset<32>& AccessMemory(const bitset<32>& address)   --> 输入地址访问内存返回存储内容
 //void PushCodeToMemory(const bitset<32>& code)         --> 向内存代码段增加代码
 //void PrintSystem() const                              --> 输出系统状态
-//void OneStepExecute()                                 --> 单步执行内存中的指令
-//void BreakPointExecute(const bitset<32> address)      --> 执行内存中的指令至断点
+//bitset<32> OneStepExecute()                           --> 单步执行指令并返回当前地址
+//void AddBreakPoint(const bitset<32> address)          --> 添加断点
+//void RemoveBreakPoint(const bitset<32> address)       --> 删除断点
+//bitset<32> BreakPointExecute()                        --> 执行指令至断点并返回当前地址
 //****************************************错误******************************************
 //FindRegister时寄存器不存在
 //AccessMemory中访问错误的内存地址
