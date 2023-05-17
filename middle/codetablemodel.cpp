@@ -31,9 +31,19 @@ void CodeTableModel::initTableFromBinFile(System sys, const QString &fileName) {
                           {QVariant{i.second}, PropertyType::String}});
             PC += 4;
         }
+        breakpoint.resize(table.size());
         emit success();
     } catch (std::exception &e) {
         emit fail(QString{e.what()});
     }
     endResetModel();
+}
+
+void CodeTableModel::setBreakpoint(int row, bool value) {
+    try {
+        breakpoint[row] = value;
+        // TODO: set breakpoint
+    } catch (std::exception &e) {
+        emit fail(QString{e.what()});
+    }
 }

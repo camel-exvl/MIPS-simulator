@@ -21,6 +21,7 @@ Window {
     }
 
     property url currentFile: ""
+    property int currentLine: -1
 
     MessagePopup {
         id: message
@@ -41,6 +42,12 @@ Window {
             text: qsTr("调试")
             onClicked: {
                 stackLayout.currentIndex = 1;
+            }
+        }
+        TabButton {
+            text: qsTr("小工具")
+            onClicked: {
+                stackLayout.currentIndex = 2;
             }
         }
     }
@@ -92,8 +99,6 @@ Window {
             id: debugTab
             columns: 2
             rows: 2
-            anchors.fill: parent
-            anchors.centerIn: parent
             Rectangle {
                 id: commandRec
                 height: parent.height / 3 * 2
@@ -123,12 +128,13 @@ Window {
                         DelegateChoice {
                             roleValue: CodeTableModel.Boolean
                             delegate: CheckBox {
-                                checked: model.value
+                                onClicked: codeTableModel.setBreakpoint(row, checked)
                             }
                         }
                         DelegateChoice {
                             roleValue: CodeTableModel.String
                             delegate: Rectangle {
+                                color: currentLine != -1 && row === currentLine ? "lightblue" : "white"
                                 Label {
                                     anchors.centerIn: parent
                                     text: model.value
@@ -211,6 +217,131 @@ Window {
                             font.pixelSize: dp(30)
                             horizontalAlignment: Text.AlignLeft
                             width: parent.width
+                        }
+                    }
+                }
+            }
+        }
+        Rectangle {
+            id: toolTab
+            Rectangle {
+                id: intRec
+                height: parent.height / 3
+                width: parent.width
+                border.color: "lightgrey"
+                Column {
+                    id: intColumn
+                    anchors.fill: parent
+                    spacing: dp(10)
+                    anchors.top: parent.top
+                    anchors.topMargin: dp(10)
+                    anchors.left: parent.left
+                    anchors.leftMargin: dp(10)
+                    Label {
+                        id: intLabel
+                        text: qsTr("整数与补码转换")
+                        font.pixelSize: dp(30)
+                    }
+                    Row {
+                        id: intRow
+                        spacing: dp(10)
+                        Label {
+                            id: intInputLabel
+                            text: qsTr("输入：")
+                            anchors.verticalCenter: parent.verticalCenter
+                            font.pixelSize: dp(30)
+                            height: intInputRec.height
+                        }
+                        ComboBox {
+                            id: intCombo
+                            anchors.verticalCenter: parent.verticalCenter
+                            height: intInputRec.height
+                            width: dp(250)
+                            font.pixelSize: dp(30)
+                            model: ["十进制整数", "整数补码"]
+                        }
+                        Rectangle {
+                            id: intInputRec
+                            border.color: "grey"
+                            height: intInput.contentHeight + dp(20)
+                            width: intInput.contentWidth < dp(200) ? dp(200) : intInput.contentWidth + dp(20)
+                            TextInput {
+                                id: intInput
+                                anchors.fill: parent
+                                anchors.margins: dp(10)
+                                font.pixelSize: dp(30)
+                            }
+                        }
+                        Button {
+                            id: intButton
+                            text: qsTr("确定")
+                            anchors.verticalCenter: parent.verticalCenter
+                            height: intInputRec.height
+                            font.pixelSize: dp(30)
+                            onClicked: {
+                                var input = intInput.text;
+                                if (input === "") {
+                                    message.show("请输入整数", "red", 5000);
+                                    return;
+                                }
+                                tools.intCalculate(intCombo.currentIndex, input);
+                            }
+                            Connections {
+                                target: tools
+                                function onSuccessIntCalculate(integer, text) {
+                                    intInteger.text = integer;
+                                    intComplete.text = text;
+                                }
+                                function onFail(err) {
+                                    message.show(err, "red", 5000);
+                                }
+                            }
+                        }
+                    }
+                    Row {
+                        id: intIntegerRow
+                        spacing: dp(10)
+                        Label {
+                            id: intIntegerLabel
+                            text: qsTr("整数：")
+                            anchors.verticalCenter: parent.verticalCenter
+                            font.pixelSize: dp(30)
+                            height: intIntegerRec.height
+                        }
+                        Rectangle {
+                            id: intIntegerRec
+                            border.color: "grey"
+                            height: intInteger.contentHeight + dp(20)
+                            width: intInteger.contentWidth < dp(200) ? dp(200) : intInteger.contentWidth + dp(20)
+                            Text {
+                                id: intInteger
+                                anchors.fill: parent
+                                anchors.margins: dp(10)
+                                font.pixelSize: dp(30)
+                            }
+                        }
+                    }
+                    Row {
+                        id: intCompleteRow
+                        spacing: dp(10)
+                        Label {
+                            id: intCompleteLabel
+                            text: qsTr("补码：")
+                            anchors.verticalCenter: parent.verticalCenter
+                            font.pixelSize: dp(30)
+                            height: intCompleteRec.height
+                        }
+                        Rectangle {
+                            id: intCompleteRec
+                            border.color: "grey"
+                            height: intComplete.contentHeight + dp(20)
+                            width: intComplete.contentWidth < dp(200) ? dp(200) : intComplete.contentWidth + dp(20)
+                            Text {
+                                id: intComplete
+                                anchors.fill: parent
+                                anchors.margins: dp(10)
+                                font.pixelSize: dp(30)
+                            }
                         }
                     }
                 }
@@ -322,6 +453,7 @@ Window {
                 Connections {
                     target: codeTableModel
                     function onSuccess() {
+                        memoryTableModel.initTable(system);
                         tabBar.currentIndex = 1;
                         stackLayout.currentIndex = 1;
                     }
@@ -343,7 +475,6 @@ Window {
         }
         Menu {
             title: qsTr("小工具")
-            // 小工具
             MenuItem {
             }
         }

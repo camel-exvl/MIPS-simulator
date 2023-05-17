@@ -51,6 +51,7 @@ class CodeTableModel : public QAbstractTableModel {
     }
 
     Q_INVOKABLE void initTableFromBinFile(System sys, const QString &fileName);
+    Q_INVOKABLE void setBreakpoint(int row, bool value);
 
    private:
     QVector<bool> breakpoint;

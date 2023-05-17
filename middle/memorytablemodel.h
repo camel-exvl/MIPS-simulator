@@ -10,7 +10,12 @@ class MemoryTableModel : public QAbstractTableModel {
     Q_OBJECT
    public:
     enum CustomRoles { ValueRole = Qt::UserRole + 1 };
-    explicit MemoryTableModel(QObject *parent = nullptr) : QAbstractTableModel(parent) {}
+    explicit MemoryTableModel(QObject *parent = nullptr) : QAbstractTableModel(parent) {
+        beginResetModel();
+        table.clear();
+        table.append({"地址", "值(+0)", "值(+4)", "值(+8)", "值(+c)", "值(+10)", "值(+14)", "值(+18)", "值(+1c)"});
+        endResetModel();
+    }
     int rowCount(const QModelIndex & = QModelIndex()) const override { return table.size(); }
 
     int columnCount(const QModelIndex & = QModelIndex()) const override { return table[0].size(); }
@@ -32,7 +37,7 @@ class MemoryTableModel : public QAbstractTableModel {
         return roles;
     }
 
-    void initTable(System &sys);
+    Q_INVOKABLE void initTable(System sys);
 
    private:
     QVector<QVector<QString>> table;
