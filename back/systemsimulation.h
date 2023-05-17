@@ -24,10 +24,10 @@ std::bitset<32> turnFloatToComplementcode(float number);
 std::bitset<64> turnDoubleToComplementcode(double number);
 
 //单精度转浮点数表示
-float turnComplementToFloat(bitset<32> complement);
+float turnComplementToFloat(std::bitset<32> complement);
 
 //双精度转浮点数表示
-double turnComplementToDouble(bitset<64> complement);
+double turnComplementToDouble(std::bitset<64> complement);
 
 int getPriority(char op);//获取传入运算符的优先级
 

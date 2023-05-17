@@ -315,8 +315,9 @@ Window {
                             border.color: "grey"
                             height: intInteger.contentHeight + dp(20)
                             width: intInteger.contentWidth < dp(200) ? dp(200) : intInteger.contentWidth + dp(20)
-                            Text {
+                            TextInput {
                                 id: intInteger
+                                readOnly: true
                                 anchors.fill: parent
                                 anchors.margins: dp(10)
                                 font.pixelSize: dp(30)
@@ -338,8 +339,9 @@ Window {
                             border.color: "grey"
                             height: intComplete.contentHeight + dp(20)
                             width: intComplete.contentWidth < dp(200) ? dp(200) : intComplete.contentWidth + dp(20)
-                            Text {
+                            TextInput {
                                 id: intComplete
+                                readOnly: true
                                 anchors.fill: parent
                                 anchors.margins: dp(10)
                                 font.pixelSize: dp(30)
@@ -408,6 +410,18 @@ Window {
                                     message.show("请输入数据", "red", 5000);
                                     return;
                                 }
+                                tools.floatCalculate(floatCombo.currentIndex, input);
+                            }
+                            Connections {
+                                target: tools
+                                function onSuccessFloatCalculate(number, floatCode, doubleCode) {
+                                    floatNumber.text = number;
+                                    floatFloat.text = floatCode;
+                                    floatDouble.text = doubleCode;
+                                }
+                                function onFail(err) {
+                                    message.show(err, "red", 5000);
+                                }
                             }
                         }
                     }
@@ -415,19 +429,20 @@ Window {
                         id: floatNumberRow
                         spacing: dp(10)
                         Label {
-                            id: floatIntegerLabel
+                            id: floatNumberLabel
                             text: qsTr("浮点数：")
                             anchors.verticalCenter: parent.verticalCenter
                             font.pixelSize: dp(30)
-                            height: floatIntegerRec.height
+                            height: floatNumberRec.height
                         }
                         Rectangle {
-                            id: floatIntegerRec
+                            id: floatNumberRec
                             border.color: "grey"
-                            height: floatInteger.contentHeight + dp(20)
-                            width: floatInteger.contentWidth < dp(200) ? dp(200) : floatInteger.contentWidth + dp(20)
-                            Text {
-                                id: floatInteger
+                            height: floatNumber.contentHeight + dp(20)
+                            width: floatNumber.contentWidth < dp(200) ? dp(200) : floatNumber.contentWidth + dp(20)
+                            TextInput {
+                                id: floatNumber
+                                readOnly: true
                                 anchors.fill: parent
                                 anchors.margins: dp(10)
                                 font.pixelSize: dp(30)
@@ -449,8 +464,9 @@ Window {
                             border.color: "grey"
                             height: floatFloat.contentHeight + dp(20)
                             width: floatFloat.contentWidth < dp(200) ? dp(200) : floatFloat.contentWidth + dp(20)
-                            Text {
+                            TextInput {
                                 id: floatFloat
+                                readOnly: true
                                 anchors.fill: parent
                                 anchors.margins: dp(10)
                                 font.pixelSize: dp(30)
@@ -472,8 +488,9 @@ Window {
                             border.color: "grey"
                             height: floatDouble.contentHeight + dp(20)
                             width: floatDouble.contentWidth < dp(200) ? dp(200) : floatDouble.contentWidth + dp(20)
-                            Text {
+                            TextInput {
                                 id: floatDouble
+                                readOnly: true
                                 anchors.fill: parent
                                 anchors.margins: dp(10)
                                 font.pixelSize: dp(30)
@@ -559,8 +576,9 @@ Window {
                             border.color: "grey"
                             height: calResult.contentHeight + dp(20)
                             width: calResult.contentWidth < dp(200) ? dp(200) : calResult.contentWidth + dp(20)
-                            Text {
+                            TextInput {
                                 id: calResult
+                                readOnly: true
                                 anchors.fill: parent
                                 anchors.margins: dp(10)
                                 font.pixelSize: dp(30)
