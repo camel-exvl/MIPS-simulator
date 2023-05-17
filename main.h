@@ -117,7 +117,7 @@ public:
     void OneStepExecute();
 
     //执行内存中的指令至断点
-    void BreakPointExecute(const bitset<32> address);
+    void BreakPointExecute(const std::bitset<32> address);
 
 private:
     //判断指令类型
