@@ -35,7 +35,7 @@ class RegisterTableModel : public QAbstractTableModel {
         return roles;
     }
 
-    void initTable(System &sys);
+    void initTable();
 
    private:
     QVector<QVector<QString>> table;

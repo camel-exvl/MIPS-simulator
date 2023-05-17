@@ -2,9 +2,11 @@
 
 using namespace std;
 
+extern System sys;
+
 Debug::Debug(QObject *parent) : QObject{parent} {}
 
-void Debug::assemble(System sys, const QString &text, const QString &fileName) {
+void Debug::assemble(const QString &text, const QString &fileName) {
     try {
         QUrl url{fileName};
         QFile file{url.toLocalFile()};

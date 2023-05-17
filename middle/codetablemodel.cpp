@@ -1,6 +1,8 @@
 #include "codetablemodel.h"
 
-void CodeTableModel::initTableFromBinFile(System sys, const QString &fileName) {
+extern System sys;
+
+void CodeTableModel::initTableFromBinFile(const QString &fileName) {
     beginResetModel();
     try {
         QUrl url{fileName};
@@ -15,6 +17,9 @@ void CodeTableModel::initTableFromBinFile(System sys, const QString &fileName) {
             disassemblerOpenFile(sys, url.toLocalFile().toStdString());
         QVector<std::pair<QString, QString>> code;
         for (auto &i : originCode) {
+            std::string machineCodeString = i.first.substr(2, i.first.size() - 2);
+            std::bitset<32> machineCode{std::stoul(machineCodeString, nullptr, 16)};
+            sys.PushCodeToMemory(machineCode);
             code.push_back({QString::fromStdString(i.first), QString::fromStdString(i.second)});
         }
 
@@ -42,7 +47,47 @@ void CodeTableModel::initTableFromBinFile(System sys, const QString &fileName) {
 void CodeTableModel::setBreakpoint(int row, bool value) {
     try {
         breakpoint[row] = value;
-        // TODO: set breakpoint
+        std::string addressString = table[row][1].value.toString().toStdString();
+        addressString = addressString.substr(2, addressString.size() - 2);
+        std::bitset<32> address{std::stoul(addressString, nullptr, 16)};
+        if (value) {
+            sys.AddBreakPoint(address);
+        } else {
+            sys.RemoveBreakPoint(address);
+        }
+        emit success();
+    } catch (std::exception &e) {
+        emit fail(QString{e.what()});
+    }
+}
+
+void CodeTableModel::executeToNextBreakpoint() {
+    try {
+        std::bitset<32> address = sys.BreakPointExecute();
+        QString targetAddress = "0x" + QString::number(address.to_ulong(), 16);
+        for (int i = 0; i < table.size(); ++i) {
+            if (table[i][1].value.toString() == targetAddress) {
+                emit successExecute(i);
+                return;
+            }
+        }
+        emit successExecute(-1);
+    } catch (std::exception &e) {
+        emit fail(QString{e.what()});
+    }
+}
+
+void CodeTableModel::executeOneStep() {
+    try {
+        std::bitset<32> address = sys.OneStepExecute();
+        QString targetAddress = "0x" + QString::number(address.to_ulong(), 16);
+        for (int i = 0; i < table.size(); ++i) {
+            if (table[i][1].value.toString() == targetAddress) {
+                emit successExecute(i);
+                return;
+            }
+        }
+        emit successExecute(-1);
     } catch (std::exception &e) {
         emit fail(QString{e.what()});
     }

@@ -130,6 +130,12 @@ Window {
                             roleValue: CodeTableModel.Boolean
                             delegate: CheckBox {
                                 onClicked: codeTableModel.setBreakpoint(row, checked)
+                                Connections {
+                                    target: codeTableModel
+                                    function onFail(err) {
+                                        message.show(err, "red", 5000);
+                                    }
+                                }
                             }
                         }
                         DelegateChoice {
@@ -670,7 +676,7 @@ Window {
                         message.show(qsTr("请先保存文件"), "red", 5000);
                         return;
                     }
-                    debug.assemble(system, edit.text, currentFile);
+                    debug.assemble(edit.text, currentFile);
                 }
                 Connections {
                     target: debug
@@ -689,12 +695,12 @@ Window {
                         message.show(qsTr("请先保存/编译文件"), "red", 5000);
                         return;
                     }
-                    codeTableModel.initTableFromBinFile(system, String(currentFile).replace(".asm", ".bin"));
+                    codeTableModel.initTableFromBinFile(String(currentFile).replace(".asm", ".bin"));
                 }
                 Connections {
                     target: codeTableModel
                     function onSuccess() {
-                        memoryTableModel.initTable(system);
+                        memoryTableModel.initTable();
                         tabBar.currentIndex = 1;
                         stackLayout.currentIndex = 1;
                     }
@@ -706,11 +712,39 @@ Window {
             MenuItem {
                 text: qsTr("运行")
                 onTriggered: {
+                    if (currentFile === "") {
+                        message.show(qsTr("请先保存/编译文件"), "red", 5000);
+                        return;
+                    }
+                    codeTableModel.executeToNextBreakpoint();
+                }
+                Connections {
+                    target: codeTableModel
+                    function onSuccessExecute(PC) {
+                        currentLine = PC;
+                    }
+                    function onFail(err) {
+                        message.show(err, "red", 5000);
+                    }
                 }
             }
             MenuItem {
                 text: qsTr("单步")
                 onTriggered: {
+                    if (currentFile === "") {
+                        message.show(qsTr("请先保存/编译文件"), "red", 5000);
+                        return;
+                    }
+                    codeTableModel.executeOneStep();
+                }
+                Connections {
+                    target: codeTableModel
+                    function onSuccessExecute(PC) {
+                        currentLine = PC;
+                    }
+                    function onFail(err) {
+                        message.show(err, "red", 5000);
+                    }
                 }
             }
         }
@@ -736,9 +770,9 @@ Window {
             if (suffix === "asm") {
                 fileProcess.openFile(selectedFile);
             } else if (suffix === "bin") {
-                codeTableModel.initTableFromBinFile(system, currentFile);
+                codeTableModel.initTableFromBinFile(currentFile);
             } else {
-                message.show("不支持的文件格式");
+                message.show("不支持的文件格式", "red", 5000);
             }
         }
         Connections {

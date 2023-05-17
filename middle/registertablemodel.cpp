@@ -2,7 +2,9 @@
 
 using namespace std;
 
-void RegisterTableModel::initTable(System &sys) {
+extern System sys;
+
+void RegisterTableModel::initTable() {
     beginResetModel();
     try {
         table.clear();

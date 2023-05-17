@@ -37,7 +37,7 @@ class MemoryTableModel : public QAbstractTableModel {
         return roles;
     }
 
-    Q_INVOKABLE void initTable(System sys);
+    Q_INVOKABLE void initTable();
 
    private:
     QVector<QVector<QString>> table;
