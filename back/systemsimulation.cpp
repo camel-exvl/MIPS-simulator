@@ -317,6 +317,7 @@ void System::Beq(int rs, int rt, int offset)//beq rt rs offset 如果rt值=rs值
     PcAutoAdd();
 }
 
+//整数转原码
 std::bitset<32> turnIntToTruecode(int number)
 {
     bitset<32> num(number);
@@ -333,24 +334,28 @@ std::bitset<32> turnIntToTruecode(int number)
     return num;
 }
 
+//整数转补码
 std::bitset<32> turnIntToComplementcode(int number)
 {
     bitset<32> num(number);
     return num;
 }
 
+//补码转整数
 int turnComplementToInt(bitset<32> complement)
 {
     int num=static_cast<int>(complement.to_ulong());
     return num;
 }
 
+//浮点数转原码
 std::bitset<32> turnFloatToTruecode(float number)
 {
     unsigned int intValue = *reinterpret_cast<unsigned int*>(&number);
     return bitset<32>(intValue);
 }
 
+//浮点数转单精度表示
 std::bitset<32> turnFloatToComplementcode(float number)
 {
     if(number>=0)
@@ -371,9 +376,27 @@ std::bitset<32> turnFloatToComplementcode(float number)
 
 }
 
+//浮点数转双精度表示
 std::bitset<64> turnDoubleToComplementcode(double number)
 {
     return std::bitset<64>(*reinterpret_cast<long long*>(&number));
+}
+
+//单精度转浮点数表示
+float turnComplementToFloat(bitset<32> complement)
+{
+    unsigned int num = complement.to_ulong();
+    float result;
+    std::memcpy(&result, &num, sizeof(float));
+    return result;
+}
+//双精度转浮点数表示
+double turnComplementToDouble(bitset<64> complement)
+{
+    unsigned long long num = complement.to_ullong();
+    double result;
+    std::memcpy(&result, &num, sizeof(double));
+    return result;
 }
 
 int getPriority(char op) {

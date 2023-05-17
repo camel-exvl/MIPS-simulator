@@ -23,6 +23,12 @@ std::bitset<32> turnFloatToComplementcode(float number);
 //浮点数转双精度表示
 std::bitset<64> turnDoubleToComplementcode(double number);
 
+//单精度转浮点数表示
+float turnComplementToFloat(bitset<32> complement);
+
+//双精度转浮点数表示
+double turnComplementToDouble(bitset<64> complement);
+
 int getPriority(char op);//获取传入运算符的优先级
 
 std::vector<std::string> toRPN(std::string s);//传入字符串将中缀表达式转为后缀表达式
