@@ -12,9 +12,8 @@ void Tools::intCalculate(int mode, const QString &text) {
             emit successIntCalculate(number, QString::fromStdString(truecode.to_string()));
         } else if (mode == 1) {
             bitset<32> complementcode{text.toStdString()};
-            // TODO:
-            // int number = complement2int(complementcode);
-            // emit successIntCalculate(QString::number(number));
+            int number = turnComplementToInt(complementcode);
+            emit successIntCalculate(number, text);
         } else {
             throw runtime_error{"mode参数错误"};
         }

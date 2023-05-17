@@ -12,7 +12,7 @@ std::bitset<32> turnIntToTruecode(int number);
 std::bitset<32> turnIntToComplementcode(int number);
 
 //补码转整数
-int turnComplementToInt(bitset<32> complement);
+int turnComplementToInt(std::bitset<32> complement);
 
 //浮点数转原码
 std::bitset<32> turnFloatToTruecode(float number);
