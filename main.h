@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <string>
 #include <utility>
+#include <stack>
 
 //Register class
 //构造函数: 0 参数 或 3 参数
@@ -67,17 +68,18 @@ public:
 
 //System class
 //构造函数: 0 参数
-//**************************************类外部接口**************************************
-//Register& FindRegister(int number)                    --> 根据编号寻找寄存器返回左值
-//Register& FindRegister(const string& name)            --> 根据名称寻找寄存器返回左值
-//bitset<32>& AccessMemory(const bitset<32>& address)   --> 输入地址访问内存返回存储内容
-//void PushCodeToMemory(const bitset<32>& code)         --> 向内存代码段增加代码
-//void PrintSystem() const                              --> 输出系统状态
-//bitset<32> OneStepExecute()                           --> 单步执行指令并返回当前地址
-//void AddBreakPoint(const bitset<32> address)          --> 添加断点
-//void RemoveBreakPoint(const bitset<32> address)       --> 删除断点
-//bitset<32> BreakPointExecute()                        --> 执行指令至断点并返回当前地址
-//****************************************错误******************************************
+//****************************************类外部接口****************************************
+//Register& FindRegister(int number)                     --> 根据编号寻找寄存器返回左值
+//Register& FindRegister(const string& name)             --> 根据名称寻找寄存器返回左值
+//bitset<32>& AccessMemory(const bitset<32>& address)    --> 输入地址访问内存返回存储内容
+//const bitset<32>& ReadMemory(const bitset<32>& address)--> 输入地址访问内存返回存储内容
+//void PushCodeToMemory(const bitset<32>& code)          --> 向内存代码段增加代码
+//void PrintSystem() const                               --> 输出系统状态
+//bitset<32> OneStepExecute()                            --> 单步执行指令并返回当前地址
+//void AddBreakPoint(const bitset<32> address)           --> 添加断点
+//void RemoveBreakPoint(const bitset<32> address)        --> 删除断点
+//bitset<32> BreakPointExecute()                         --> 执行指令至断点并返回当前地址
+//******************************************错误********************************************
 //FindRegister时寄存器不存在
 //AccessMemory中访问错误的内存地址
 //PushCodeToMemory时代码大小超出内存代码段
@@ -110,6 +112,7 @@ public:
 
     //访问内存，输入地址，返回内存地址内容
     std::bitset<32>& AccessMemory(const std::bitset<32>& address);
+    const std::bitset<32>& ReadMemory(const std::bitset<32>& address)const;
 
     //向内存代码段添加机器指令
     void PushCodeToMemory(const std::bitset<32>& code);

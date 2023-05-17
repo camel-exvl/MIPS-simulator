@@ -110,6 +110,40 @@ bitset<32>& System::AccessMemory(const bitset<32>& address)
     }
 }
 
+const bitset<32>& System::ReadMemory(const bitset<32>& address)const
+{
+    //保留区，禁止访问
+    if (address.to_ulong() < 0x00400000)
+    {
+        cerr << "内存保留区域，不允许访问" << endl;
+        exit(-1);
+    }
+    //代码段，返回机器指令
+    else if (address.to_ulong() < 0x10000000)
+    {
+        return mem.text_segment.at(address.to_ulong());
+    }
+    else if (address.to_ulong() < 0x7fffffff)
+    {
+        //数据段，返回存储数据
+        if (address.to_ulong() <  registers.at(29).value.to_ulong())
+        {
+            return mem.data_segment.at(address.to_ulong());
+        }
+        //堆栈段，返回堆栈数据
+        else
+        {
+            return mem.stack_segment.at(address.to_ulong());
+        }
+    }
+    //地址越界报错
+    else
+    {
+        cerr << "错误的内存地址，超出内存大小" << endl;
+        exit(-1);
+    }
+}
+
 //向内存代码段添加机器指令
 void System::PushCodeToMemory(const bitset<32>& code)
 {
