@@ -121,19 +121,19 @@ const bitset<32>& System::ReadMemory(const bitset<32>& address)const
     //代码段，返回机器指令
     else if (address.to_ulong() < 0x10000000)
     {
-        return mem.text_segment.at(address.to_ulong());
+        return mem.text_segment[address.to_ulong()];
     }
     else if (address.to_ulong() < 0x7fffffff)
     {
         //数据段，返回存储数据
         if (address.to_ulong() <  registers.at(29).value.to_ulong())
         {
-            return mem.data_segment.at(address.to_ulong());
+            return mem.data_segment[address.to_ulong()];
         }
         //堆栈段，返回堆栈数据
         else
         {
-            return mem.stack_segment.at(address.to_ulong());
+            return mem.stack_segment[address.to_ulong()];
         }
     }
     //地址越界报错

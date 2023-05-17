@@ -72,7 +72,7 @@ public:
 //Register& FindRegister(int number)                     --> 根据编号寻找寄存器返回左值
 //Register& FindRegister(const string& name)             --> 根据名称寻找寄存器返回左值
 //bitset<32>& AccessMemory(const bitset<32>& address)    --> 输入地址访问内存返回存储内容
-//const bitset<32>& ReadMemory(const bitset<32>& address)--> 输入地址访问内存返回存储内容
+//const bitset<32>& ReadMemory(const bitset<32>& address)--> 只读内存内容
 //void PushCodeToMemory(const bitset<32>& code)          --> 向内存代码段增加代码
 //void PrintSystem() const                               --> 输出系统状态
 //bitset<32> OneStepExecute()                            --> 单步执行指令并返回当前地址
