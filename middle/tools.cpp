@@ -29,3 +29,12 @@ void Tools::floatCalculate(int mode, const QString &text) {
         emit fail(QString{e.what()});
     }
 }
+
+void Tools::calculate(const QString &text) {
+    try {
+        double result = calculateRPN(toRPN(text.toStdString()));
+        emit successCalculate(result);
+    } catch (exception &e) {
+        emit fail(QString{e.what()});
+    }
+}

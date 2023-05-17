@@ -529,10 +529,17 @@ Window {
                             height: calInputRec.height
                             font.pixelSize: dp(30)
                             onClicked: {
-                                var input = intInput.text;
+                                var input = calInput.text;
                                 if (input === "") {
                                     message.show("请输入数据", "red", 5000);
                                     return;
+                                }
+                                tools.calculate(input);
+                            }
+                            Connections {
+                                target: tools
+                                function onSuccessCalculate(result) {
+                                    calResult.text = result;
                                 }
                             }
                         }
