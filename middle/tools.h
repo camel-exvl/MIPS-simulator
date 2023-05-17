@@ -10,6 +10,8 @@ class Tools : public QObject {
     explicit Tools(QObject *parent = nullptr);
     Q_INVOKABLE void intCalculate(int mode,
                                    const QString &text);  // mode = 0: true->complement; mode = 1: complement->true
+    Q_INVOKABLE void floatCalculate(int mode,
+                                     const QString &text);  // mode = 0: 10-floating; mode = 1: float; mode = 2: double
    signals:
     void success();
     void successIntCalculate(const int &integer, const QString &text);

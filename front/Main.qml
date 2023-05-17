@@ -66,6 +66,7 @@ Window {
             Flickable {
                 id: flick
                 anchors.fill: parent
+                anchors.margins: dp(10)
                 contentWidth: edit.contentWidth
                 contentHeight: edit.contentHeight
                 clip: true
@@ -222,8 +223,9 @@ Window {
                 }
             }
         }
-        Rectangle {
+        Column {
             id: toolTab
+            spacing: 0
             Rectangle {
                 id: intRec
                 height: parent.height / 3
@@ -232,7 +234,7 @@ Window {
                 Column {
                     id: intColumn
                     anchors.fill: parent
-                    spacing: dp(10)
+                    spacing: dp(20)
                     anchors.top: parent.top
                     anchors.topMargin: dp(10)
                     anchors.left: parent.left
@@ -256,7 +258,7 @@ Window {
                             id: intCombo
                             anchors.verticalCenter: parent.verticalCenter
                             height: intInputRec.height
-                            width: dp(250)
+                            width: dp(300)
                             font.pixelSize: dp(30)
                             model: ["十进制整数", "整数补码"]
                         }
@@ -281,7 +283,7 @@ Window {
                             onClicked: {
                                 var input = intInput.text;
                                 if (input === "") {
-                                    message.show("请输入整数", "red", 5000);
+                                    message.show("请输入数据", "red", 5000);
                                     return;
                                 }
                                 tools.intCalculate(intCombo.currentIndex, input);
@@ -338,6 +340,220 @@ Window {
                             width: intComplete.contentWidth < dp(200) ? dp(200) : intComplete.contentWidth + dp(20)
                             Text {
                                 id: intComplete
+                                anchors.fill: parent
+                                anchors.margins: dp(10)
+                                font.pixelSize: dp(30)
+                            }
+                        }
+                    }
+                }
+            }
+            Rectangle {
+                id: floatRec
+                height: parent.height / 3
+                width: parent.width
+                border.color: "lightgrey"
+                Column {
+                    id: floatColumn
+                    anchors.fill: parent
+                    spacing: dp(20)
+                    anchors.top: parent.top
+                    anchors.topMargin: dp(10)
+                    anchors.left: parent.left
+                    anchors.leftMargin: dp(10)
+                    Label {
+                        id: floatLabel
+                        text: qsTr("浮点数表示")
+                        font.pixelSize: dp(30)
+                    }
+                    Row {
+                        id: floatRow
+                        spacing: dp(10)
+                        Label {
+                            id: floatInputLabel
+                            text: qsTr("输入：")
+                            anchors.verticalCenter: parent.verticalCenter
+                            font.pixelSize: dp(30)
+                            height: floatInputRec.height
+                        }
+                        ComboBox {
+                            id: floatCombo
+                            anchors.verticalCenter: parent.verticalCenter
+                            height: floatInputRec.height
+                            width: dp(300)
+                            font.pixelSize: dp(30)
+                            model: ["十进制浮点数", "单精度浮点数", "双精度浮点数"]
+                        }
+                        Rectangle {
+                            id: floatInputRec
+                            border.color: "grey"
+                            height: floatInput.contentHeight + dp(20)
+                            width: floatInput.contentWidth < dp(200) ? dp(200) : floatInput.contentWidth + dp(20)
+                            TextInput {
+                                id: floatInput
+                                anchors.fill: parent
+                                anchors.margins: dp(10)
+                                font.pixelSize: dp(30)
+                            }
+                        }
+                        Button {
+                            id: floatButton
+                            text: qsTr("确定")
+                            anchors.verticalCenter: parent.verticalCenter
+                            height: floatInputRec.height
+                            font.pixelSize: dp(30)
+                            onClicked: {
+                                var input = floatInput.text;
+                                if (input === "") {
+                                    message.show("请输入数据", "red", 5000);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                    Row {
+                        id: floatNumberRow
+                        spacing: dp(10)
+                        Label {
+                            id: floatIntegerLabel
+                            text: qsTr("浮点数：")
+                            anchors.verticalCenter: parent.verticalCenter
+                            font.pixelSize: dp(30)
+                            height: floatIntegerRec.height
+                        }
+                        Rectangle {
+                            id: floatIntegerRec
+                            border.color: "grey"
+                            height: floatInteger.contentHeight + dp(20)
+                            width: floatInteger.contentWidth < dp(200) ? dp(200) : floatInteger.contentWidth + dp(20)
+                            Text {
+                                id: floatInteger
+                                anchors.fill: parent
+                                anchors.margins: dp(10)
+                                font.pixelSize: dp(30)
+                            }
+                        }
+                    }
+                    Row {
+                        id: floatFloatRow
+                        spacing: dp(10)
+                        Label {
+                            id: floatFloatLabel
+                            text: qsTr("单精度浮点数：")
+                            anchors.verticalCenter: parent.verticalCenter
+                            font.pixelSize: dp(30)
+                            height: floatFloatRec.height
+                        }
+                        Rectangle {
+                            id: floatFloatRec
+                            border.color: "grey"
+                            height: floatFloat.contentHeight + dp(20)
+                            width: floatFloat.contentWidth < dp(200) ? dp(200) : floatFloat.contentWidth + dp(20)
+                            Text {
+                                id: floatFloat
+                                anchors.fill: parent
+                                anchors.margins: dp(10)
+                                font.pixelSize: dp(30)
+                            }
+                        }
+                    }
+                    Row {
+                        id: floatDoubleRow
+                        spacing: dp(10)
+                        Label {
+                            id: floatDoubleLabel
+                            text: qsTr("双精度浮点数：")
+                            anchors.verticalCenter: parent.verticalCenter
+                            font.pixelSize: dp(30)
+                            height: floatDoubleRec.height
+                        }
+                        Rectangle {
+                            id: floatDoubleRec
+                            border.color: "grey"
+                            height: floatDouble.contentHeight + dp(20)
+                            width: floatDouble.contentWidth < dp(200) ? dp(200) : floatDouble.contentWidth + dp(20)
+                            Text {
+                                id: floatDouble
+                                anchors.fill: parent
+                                anchors.margins: dp(10)
+                                font.pixelSize: dp(30)
+                            }
+                        }
+                    }
+                }
+            }
+            Rectangle {
+                id: calRec
+                height: parent.height / 3
+                width: parent.width
+                border.color: "lightgrey"
+                Column {
+                    id: calColumn
+                    anchors.fill: parent
+                    spacing: dp(20)
+                    anchors.top: parent.top
+                    anchors.topMargin: dp(10)
+                    anchors.left: parent.left
+                    anchors.leftMargin: dp(10)
+                    Label {
+                        id: calLabel
+                        text: qsTr("计算器")
+                        font.pixelSize: dp(30)
+                    }
+                    Row {
+                        id: calRow
+                        spacing: dp(10)
+                        Label {
+                            id: calInputLabel
+                            text: qsTr("输入计算表达式：")
+                            anchors.verticalCenter: parent.verticalCenter
+                            font.pixelSize: dp(30)
+                            height: calInputRec.height
+                        }
+                        Rectangle {
+                            id: calInputRec
+                            border.color: "grey"
+                            height: calInput.contentHeight + dp(20)
+                            width: calInput.contentWidth < dp(200) ? dp(200) : calInput.contentWidth + dp(20)
+                            TextInput {
+                                id: calInput
+                                anchors.fill: parent
+                                anchors.margins: dp(10)
+                                font.pixelSize: dp(30)
+                            }
+                        }
+                        Button {
+                            id: calButton
+                            text: qsTr("确定")
+                            anchors.verticalCenter: parent.verticalCenter
+                            height: calInputRec.height
+                            font.pixelSize: dp(30)
+                            onClicked: {
+                                var input = intInput.text;
+                                if (input === "") {
+                                    message.show("请输入数据", "red", 5000);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                    Row {
+                        id: calResultRow
+                        spacing: dp(10)
+                        Label {
+                            id: calResultLabel
+                            text: qsTr("结果：")
+                            anchors.verticalCenter: parent.verticalCenter
+                            font.pixelSize: dp(30)
+                            height: calResultRec.height
+                        }
+                        Rectangle {
+                            id: calResultRec
+                            border.color: "grey"
+                            height: calResult.contentHeight + dp(20)
+                            width: calResult.contentWidth < dp(200) ? dp(200) : calResult.contentWidth + dp(20)
+                            Text {
+                                id: calResult
                                 anchors.fill: parent
                                 anchors.margins: dp(10)
                                 font.pixelSize: dp(30)
@@ -471,11 +687,6 @@ Window {
                 text: qsTr("单步")
                 onTriggered: {
                 }
-            }
-        }
-        Menu {
-            title: qsTr("小工具")
-            MenuItem {
             }
         }
         Menu {

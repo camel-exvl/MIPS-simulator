@@ -22,3 +22,11 @@ void Tools::intCalculate(int mode, const QString &text) {
         emit fail(QString{e.what()});
     }
 }
+
+void Tools::floatCalculate(int mode, const QString &text) {
+    try {
+        // TODO:
+    } catch (exception &e) {
+        emit fail(QString{e.what()});
+    }
+}
