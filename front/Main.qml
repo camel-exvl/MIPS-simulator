@@ -203,7 +203,7 @@ Window {
                     columnWidthProvider: function (column) {
                         switch (column) {
                         case 0:
-                            return dp(200);
+                            return dp(250);
                         case 1:
                         case 2:
                         case 3:
@@ -717,12 +717,26 @@ Window {
                         return;
                     }
                     codeTableModel.executeToNextBreakpoint();
+                    registerTableModel.initTable();
+                    memoryTableModel.initTable();
                 }
                 Connections {
                     target: codeTableModel
                     function onSuccessExecute(PC) {
                         currentLine = PC;
                     }
+                    function onFail(err) {
+                        message.show(err, "red", 5000);
+                    }
+                }
+                Connections {
+                    target: registerTableModel
+                    function onFail(err) {
+                        message.show(err, "red", 5000);
+                    }
+                }
+                Connections {
+                    target: memoryTableModel
                     function onFail(err) {
                         message.show(err, "red", 5000);
                     }
@@ -736,12 +750,26 @@ Window {
                         return;
                     }
                     codeTableModel.executeOneStep();
+                    registerTableModel.initTable();
+                    memoryTableModel.initTable();
                 }
                 Connections {
                     target: codeTableModel
                     function onSuccessExecute(PC) {
                         currentLine = PC;
                     }
+                    function onFail(err) {
+                        message.show(err, "red", 5000);
+                    }
+                }
+                Connections {
+                    target: registerTableModel
+                    function onFail(err) {
+                        message.show(err, "red", 5000);
+                    }
+                }
+                Connections {
+                    target: memoryTableModel
                     function onFail(err) {
                         message.show(err, "red", 5000);
                     }

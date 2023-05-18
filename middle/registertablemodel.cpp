@@ -17,7 +17,7 @@ void RegisterTableModel::initTable() {
                           QString::fromStdString("0x" + ss.str())});
         }
     } catch (exception &e) {
-        cerr << e.what() << endl;
+        emit fail(QString{e.what()});
     }
     endResetModel();
 }

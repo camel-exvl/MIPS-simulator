@@ -41,6 +41,8 @@ class MemoryTableModel : public QAbstractTableModel {
 
    private:
     QVector<QVector<QString>> table;
+   signals:
+    void fail(QString);
 };
 
 #endif  // MEMORYTABLEMODEL_H
