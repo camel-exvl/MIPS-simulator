@@ -43,10 +43,10 @@ void System::InitRegister()
 //根据编号找到寄存器并返回寄存器类
 Register& System::FindRegister(int number)
 {
-    //遍历寄存器组
-    for (auto& i : registers)
-        if (i.number == number)
-            return i;
+    if (number < 32 && number >= 0)
+    {
+        return registers.at(number);
+    }
     //若找不到则报错
     cerr << "寄存器不存在" << endl;
     exit(-1);
@@ -207,6 +207,15 @@ bitset<32> System::BreakPointExecute()
     return PC.Getvalue();
 }
 
+//重新调试
+void System::Reset()
+{
+    System s;
+    this->mem = s.mem;
+    this->registers = s.registers;
+    this->PC = s.PC;
+    this->breakpoints = s.breakpoints;
+}
 
 //R型指令
 void System::InstructionRType(const string machineCode)
