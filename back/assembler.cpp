@@ -107,6 +107,8 @@ void assemblerToFile(System& sys, std::vector<std::string> s,const std::string& 
         ofs.write((char *) &item + 1, 1);
         ofs.write((char *) &item + 0, 1);
     }
+    vector <Instruction>().swap(instructions);
+    Count = 0;
     ofs.close();
 }
 
