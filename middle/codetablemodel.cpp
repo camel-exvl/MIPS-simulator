@@ -5,6 +5,7 @@ extern System sys;
 void CodeTableModel::initTableFromBinFile(const QString &fileName) {
     beginResetModel();
     try {
+        sys.Reset();
         QUrl url{fileName};
         QFile file{url.toLocalFile()};
         if (!file.exists()) {
