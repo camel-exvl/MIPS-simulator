@@ -112,7 +112,7 @@ public:
 
     //访问内存，输入地址，返回内存地址内容
     std::bitset<32>& AccessMemory(const std::bitset<32>& address);
-    const std::bitset<32>& ReadMemory(const std::bitset<32>& address)const;
+    const std::bitset<32>& ReadMemory(const std::bitset<32>& address);
 
     //向内存代码段添加机器指令
     void PushCodeToMemory(const std::bitset<32>& code);
@@ -155,7 +155,7 @@ private:
     void Sll(int rt, int rd, int shamt);
     void And(int rs, int rt, int rd);
     void Or(int rs, int rt, int rd);
-    void Jr(int rs);//
+    void Jr(int rs);
     void Lw(int rs, int rt, int offset);
     void Sw(int rs, int rt, int offset);
     void Beq(int rs, int rt, int offset);

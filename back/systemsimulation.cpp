@@ -110,7 +110,7 @@ bitset<32>& System::AccessMemory(const bitset<32>& address)
     }
 }
 
-const bitset<32>& System::ReadMemory(const bitset<32>& address)const
+const bitset<32>& System::ReadMemory(const bitset<32>& address)
 {
     //保留区，禁止访问
     if (address.to_ulong() < 0x00400000)
@@ -190,10 +190,19 @@ void System::RemoveBreakPoint(const std::bitset<32> address)
 //执行内存中的指令至断点
 bitset<32> System::BreakPointExecute()
 {
+    if (OneStepExecute() == mem.texttop)
+    {
+        cerr << "已执行完所有指令" << endl;
+        return PC.Getvalue();
+    }
     //若当前指令不是断点就继续执行
     while (breakpoints[PC.Getvalue().to_ulong()] == false)
     {
-        OneStepExecute();
+        if (OneStepExecute() == mem.texttop)
+        {
+            cerr << "已执行完所有指令" << endl;
+            return PC.Getvalue();
+        }
     }
     return PC.Getvalue();
 }
