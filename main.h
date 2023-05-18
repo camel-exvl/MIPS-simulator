@@ -79,6 +79,7 @@ public:
 //void AddBreakPoint(const bitset<32> address)           --> 添加断点
 //void RemoveBreakPoint(const bitset<32> address)        --> 删除断点
 //bitset<32> BreakPointExecute()                         --> 执行指令至断点并返回当前地址
+//void Reset()                                           --> 重新调试
 //******************************************错误********************************************
 //FindRegister时寄存器不存在
 //AccessMemory中访问错误的内存地址
@@ -131,6 +132,9 @@ public:
 
     //执行内存中的指令至断点
     std::bitset<32> BreakPointExecute();
+
+    //重新调试
+    void Reset();
 
 private:
     //判断指令类型
