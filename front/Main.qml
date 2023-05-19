@@ -21,7 +21,7 @@ Window {
     }
 
     property url currentFile: ""
-    property int currentLine: -1
+    property int currentLine: 1
 
     MessagePopup {
         id: message
@@ -564,6 +564,9 @@ Window {
                                 function onSuccessCalculate(result) {
                                     calResult.text = result;
                                 }
+                                function onFail(err) {
+                                    message.show(err, "red", 5000);
+                                }
                             }
                         }
                     }
@@ -701,6 +704,7 @@ Window {
                     target: codeTableModel
                     function onSuccess() {
                         memoryTableModel.initTable();
+                        currentLine = 1;
                         tabBar.currentIndex = 1;
                         stackLayout.currentIndex = 1;
                     }
