@@ -354,7 +354,11 @@ void System::Sw(int rs, int rt, int offset)//sw rt rs offset rt存到rs+offset:�
 {
     int address=FindRegister(rs).Getvalue().to_ulong()+offset;
     bitset<32> addr(address);
-    AccessMemory(addr)=FindRegister(rt).Getvalue();
+    if (addr.to_ulong() > mem.datatop.to_ulong())
+    {
+        mem.datatop = bitset<32>{ address + 4 };
+    }
+    AccessMemory(addr) = FindRegister(rt).Getvalue();
     PcAutoAdd();
 }
 void System::Beq(int rs, int rt, int offset)//beq rt rs offset 如果rt值=rs值，跳转到PC+offset
