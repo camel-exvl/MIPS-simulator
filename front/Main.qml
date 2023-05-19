@@ -780,15 +780,15 @@ Window {
                 }
             }
         }
-        Menu {
-            title: qsTr("帮助")
-            MenuItem {
-                text: qsTr("关于")
-                onTriggered: {
-                    aboutDialog.open();
-                }
-            }
-        }
+        // Menu {
+        //     title: qsTr("帮助")
+        //     MenuItem {
+        //         text: qsTr("关于")
+        //         onTriggered: {
+        //             aboutDialog.open();
+        //         }
+        //     }
+        // }
     }
 
     FileDialog {
