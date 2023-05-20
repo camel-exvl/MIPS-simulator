@@ -144,7 +144,7 @@ private:
     void InstructionIType(const std::string machineCode);
 
     //J型指令
-    void InstructionJType(const std::string machineCode);//J型指令只有J，所以直接判断即可
+    void InstructionJType(const std::string machineCode);
 
     //R型指令
     void InstructionRType(const std::string machineCode);
@@ -163,4 +163,6 @@ private:
     void Lw(int rs, int rt, int offset);
     void Sw(int rs, int rt, int offset);
     void Beq(int rs, int rt, int offset);
+    void J(int addr);
+    void Jal(int addr);
 };

@@ -2,7 +2,7 @@
 #include"systemsimulation.h"
 
 using namespace std;
-int textline=0;//设置输入数据目前读取到第几行
+int textline = 0;//设置输入数据目前读取到第几行
 //初始化寄存器组
 void System::InitRegister()
 {
@@ -126,7 +126,7 @@ const bitset<32>& System::ReadMemory(const bitset<32>& address)
     else if (address.to_ulong() < 0x7fffffff)
     {
         //数据段，返回存储数据
-        if (address.to_ulong() <  registers.at(29).value.to_ulong())
+        if (address.to_ulong() < registers.at(29).value.to_ulong())
         {
             return mem.data_segment[address.to_ulong()];
         }
@@ -225,31 +225,29 @@ void System::InstructionRType(const string machineCode)
     int rd = stoi(machineCode.substr(16, 5), nullptr, 2);
     int shamt = stoi(machineCode.substr(21, 5), nullptr, 2);
     int funct = stoi(machineCode.substr(26, 6), nullptr, 2);
-    if(funct== 0x20)
-    Add(rs,rt,rd);
-    else if(funct== 0x22)
-    Sub(rs, rt, rd);
-    else if(funct== 0x00)
-    Sll(rt, rd, shamt);
-    else if(funct== 0x24)
-    And(rs, rt, rd);
-    else if(funct== 0x25)
-    Or(rs, rt, rd);
+    if (funct == 0x20)
+        Add(rs, rt, rd);
+    else if (funct == 0x22)
+        Sub(rs, rt, rd);
+    else if (funct == 0x00)
+        Sll(rt, rd, shamt);
+    else if (funct == 0x24)
+        And(rs, rt, rd);
+    else if (funct == 0x25)
+        Or(rs, rt, rd);
     else
-    Jr(rs);
+        Jr(rs);
 }
 
 //J型指令
 void System::InstructionJType(const string machineCode)//J型指令只有J，所以直接判断即可
 {
+    int op = stoi(machineCode.substr(0, 6), nullptr, 2);
     int addr = stoi(machineCode.substr(6, 26), nullptr, 2);
-    string str = PC.Getvalue().to_string();
-    string first = str.substr(0, 4);
-    string second = to_string(addr);
-    string strPC = first+second+"00";
-    bitset<32> bits(strPC);
-    PC.value=bits;
-    //26位后面加00，前面取PC的前4位加起来组成32位   
+    if (op == 0x02)
+        J(addr);
+    else if (op == 0x03)
+        Jal(addr);
 }
 
 inline static int complement2int(const bitset<16> complement) {
@@ -268,38 +266,38 @@ void System::InstructionIType(const string machineCode)
     int rt = stoi(machineCode.substr(11, 5), nullptr, 2);
     bitset<16> immediate(machineCode.substr(16, 16));
     int imm = complement2int(immediate);
-    if(op== 0x08)
-    Addi(rs,rt,imm);
-    else if(op== 0x23)                                                                                   
-    Lw(rs,rt,imm);
-    else if(op== 0x2B)
-    Sw(rs,rt,imm);
-    else if(op== 0x04)
-    Beq(rs,rt,imm);
+    if (op == 0x08)
+        Addi(rs, rt, imm);
+    else if (op == 0x23)
+        Lw(rs, rt, imm);
+    else if (op == 0x2B)
+        Sw(rs, rt, imm);
+    else if (op == 0x04)
+        Beq(rs, rt, imm);
 }
 
 //判断指令类型
 void System::JudgeInstruction(const bitset<32>& code)
 {
-    string machinecode=code.to_string();
+    string machinecode = code.to_string();
     int op = code.to_ulong() >> 26;
     if (op == 0) //R型指令 ADD,SUB,SLL,AND,OR,JR
     {
-        InstructionRType(machinecode);      
-    } 
-    else if (op >> 1 == 1 || op >> 2 == 0b100) //J型指令 J
+        InstructionRType(machinecode);
+    }
+    else if (op == 2 || op == 3) //J型指令 J
     {
-        InstructionJType(machinecode);  
-    } 
+        InstructionJType(machinecode);
+    }
     else //I型指令 ADDI LW SW BEQ
     {
-        InstructionIType(machinecode);  
+        InstructionIType(machinecode);
     }
 }
 
 void System::PcAutoAdd()
 {
-    int address=PC.Getvalue().to_ulong()+4;
+    int address = PC.Getvalue().to_ulong() + 4;
     bitset<32> addr(address);
     PC.value = addr;
 }
@@ -316,7 +314,7 @@ void System::Sub(int rs, int rt, int rd)
     FindRegister(rd).value = bitset<32>{ temp };
     PcAutoAdd();
 }
-void System::Sll(int rt,int rd,int shamt)
+void System::Sll(int rt, int rd, int shamt)
 {
     FindRegister(rd).value = FindRegister(rt).value << shamt;
     PcAutoAdd();
@@ -340,37 +338,64 @@ void System::Addi(int rs, int rt, int imm)
 
 void System::Jr(int rs)//跳转到指定寄存器存储的地址
 {
-    PC.value=FindRegister(rs).Getvalue();
+    PC.value = FindRegister(rs).Getvalue();
 }
 void System::Lw(int rs, int rt, int offset)//lw rt rs offset, rs 加载到rt+offset
 //rs 表示要加载的数据的内存地址所在的寄存器编号，rt 表示目标寄存器编号，offset 表示要加载的数据在内存中的偏移量。
 {
-    int address=FindRegister(rs).Getvalue().to_ulong()+offset;
+    int address = FindRegister(rs).Getvalue().to_ulong() + offset;
     bitset<32> addr(address);
-    FindRegister(rt).value=AccessMemory(addr);
+    FindRegister(rt).value = AccessMemory(addr);
     PcAutoAdd();
 }
 void System::Sw(int rs, int rt, int offset)//sw rt rs offset rt存到rs+offset:给目标地址赋值
 {
-    int address=FindRegister(rs).Getvalue().to_ulong()+offset;
+    int address = FindRegister(rs).Getvalue().to_ulong() + offset;
     bitset<32> addr(address);
-    if (addr.to_ulong()<registers.at(29).value.to_ulong() && addr.to_ulong() > mem.datatop.to_ulong())
+    if (addr.to_ulong() < registers.at(29).value.to_ulong() && addr.to_ulong() > mem.datatop.to_ulong())
     {
-        mem.datatop = bitset<32>( address + 4 );
+        mem.datatop = bitset<32>(address + 4);
     }
     AccessMemory(addr) = FindRegister(rt).Getvalue();
     PcAutoAdd();
 }
 void System::Beq(int rs, int rt, int offset)//beq rt rs offset 如果rt值=rs值，跳转到PC+offset
 {
-    if(FindRegister(rs).Getvalue()==FindRegister(rt).Getvalue())
+    if (FindRegister(rs).Getvalue() == FindRegister(rt).Getvalue())
     {
-        int address=PC.Getvalue().to_ulong()+offset;
+        int address = PC.Getvalue().to_ulong() + offset;
         bitset<32> addr(address);
         PC.value = addr;
     }
     else
-    PcAutoAdd();
+        PcAutoAdd();
+}
+
+void System::J(int addr)
+{
+    string str = PC.Getvalue().to_string();
+    bitset<32> add(addr);
+    string first = str.substr(0, 4);
+    string second = add.to_string();
+    string strPC = first + second + "00";
+    int intPC = stoi(strPC, nullptr, 2);
+    bitset<32> bits(intPC);
+    PC.value = bits;
+    //26位后面加00，前面取PC的前4位加起来组成32位  
+}
+
+void System::Jal(int addr)
+{
+    FindRegister(31).value = bitset<32>(PC.value.to_ulong() + 4);
+    string str = PC.Getvalue().to_string();
+    bitset<32> add(addr);
+    string first = str.substr(0, 4);
+    string second = add.to_string();
+    string strPC = first + second + "00";
+    int intPC = stoi(strPC, nullptr, 2);
+    bitset<32> bits(intPC);
+    PC.value = bits;
+    //26位后面加00，前面取PC的前4位加起来组成32位  
 }
 
 //整数转原码
@@ -385,7 +410,7 @@ std::bitset<32> turnIntToTruecode(int number)
                 break;
             }
         }
-        num[31]=1;
+        num[31] = 1;
     }
     return num;
 }
@@ -400,7 +425,7 @@ std::bitset<32> turnIntToComplementcode(int number)
 //补码转整数
 int turnComplementToInt(bitset<32> complement)
 {
-    int num=static_cast<int>(complement.to_ulong());
+    int num = static_cast<int>(complement.to_ulong());
     return num;
 }
 
@@ -414,8 +439,8 @@ std::bitset<32> turnFloatToTruecode(float number)
 //浮点数转单精度表示
 std::bitset<32> turnFloatToComplementcode(float number)
 {
-    if(number>=0)
-    return turnFloatToTruecode(number);
+    if (number >= 0)
+        return turnFloatToTruecode(number);
     else
     {
         bitset<32> num = turnFloatToTruecode(number);
@@ -426,7 +451,7 @@ std::bitset<32> turnFloatToComplementcode(float number)
                 break;
             }
         }
-        num[31]=1;
+        num[31] = 1;
         return num;
     }
 
@@ -458,9 +483,11 @@ double turnComplementToDouble(bitset<64> complement)
 int getPriority(char op) {
     if (op == '+' || op == '-') {
         return 1;
-    } else if (op == '*' || op == '/') {
+    }
+    else if (op == '*' || op == '/') {
         return 2;
-    } else {
+    }
+    else {
         return 0;
     }
 }
@@ -480,10 +507,12 @@ std::vector<std::string> toRPN(std::string s) {
         if (isdigit(s[i]) || s[i] == '.') {
             number += s[i];
             lastWasOperator = false;
-        } else if (s[i] == '-' && lastWasOperator) {
+        }
+        else if (s[i] == '-' && lastWasOperator) {
             number += s[i];
             lastWasOperator = false;
-        } else {
+        }
+        else {
             if (!number.empty()) {
                 rpn.push_back(number);
                 number = "";
@@ -508,19 +537,20 @@ std::vector<std::string> toRPN(std::string s) {
 
 double calculateRPN(std::vector<std::string> rpn) {
     std::stack<double> stack;
-    for (const auto &s : rpn) {
+    for (const auto& s : rpn) {
         if (isdigit(s[0]) || (s.size() > 1 && (isdigit(s[1]) || s[1] == '.'))) {
             stack.push(stod(s));
-        } else {
+        }
+        else {
             double right = stack.top();
             stack.pop();
             double left = stack.top();
             stack.pop();
             switch (s[0]) {
-                case '+': stack.push(left + right); break;
-                case '-': stack.push(left - right); break;
-                case '*': stack.push(left * right); break;
-                case '/': stack.push(left / right); break;
+            case '+': stack.push(left + right); break;
+            case '-': stack.push(left - right); break;
+            case '*': stack.push(left * right); break;
+            case '/': stack.push(left / right); break;
             }
         }
     }
