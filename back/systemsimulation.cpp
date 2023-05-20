@@ -89,12 +89,12 @@ bitset<32>& System::AccessMemory(const bitset<32>& address)
         //数据段，返回存储数据
         if (address.to_ulong() < mem.datatop.to_ulong())
         {
-            return mem.data_segment.at(address.to_ulong());
+            return mem.data_segment[address.to_ulong()];
         }
         //堆栈段，返回堆栈数据
         else if (address.to_ulong() >= registers.at(29).value.to_ulong())
         {
-            return mem.stack_segment.at(address.to_ulong());
+            return mem.stack_segment[address.to_ulong()];
         }
         else//如果访问数据段与堆栈段之间的空内存报错
         {
@@ -354,9 +354,9 @@ void System::Sw(int rs, int rt, int offset)//sw rt rs offset rt存到rs+offset:�
 {
     int address=FindRegister(rs).Getvalue().to_ulong()+offset;
     bitset<32> addr(address);
-    if (addr.to_ulong() > mem.datatop.to_ulong())
+    if (addr.to_ulong()<registers.at(29).value.to_ulong() && addr.to_ulong() > mem.datatop.to_ulong())
     {
-        mem.datatop = bitset<32>{ address + 4 };
+        mem.datatop = bitset<32>( address + 4 );
     }
     AccessMemory(addr) = FindRegister(rt).Getvalue();
     PcAutoAdd();
