@@ -228,6 +228,34 @@ Window {
                     }
                 }
             }
+            Rectangle {
+                id: memorySelectorRec
+                height: parent.height / 3
+                width: parent.width / 5
+                border.color: "lightgrey"
+
+                Label {
+                    id: memorySelectorLabel
+                    text: qsTr("内存地址：")
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.margins: dp(20)
+                    font.pixelSize: dp(30)
+                }
+                ComboBox {
+                    id: memorySelector
+                    anchors.top: memorySelectorLabel.bottom
+                    anchors.left: parent.left
+                    anchors.margins: dp(20)
+                    model: ["堆栈段(0x7ffffedc)", "数据段(0x10000000)", "代码段(0x00400000)"]
+                    currentIndex: 0
+                    width: dp(400)
+                    font.pixelSize: dp(30)
+                    onCurrentIndexChanged: {
+                        memoryTableModel.setDisplayMemory(memorySelector.currentIndex);
+                    }
+                }
+            }
         }
         Column {
             id: toolTab
@@ -780,15 +808,15 @@ Window {
                 }
             }
         }
-        // Menu {
-        //     title: qsTr("帮助")
-        //     MenuItem {
-        //         text: qsTr("关于")
-        //         onTriggered: {
-        //             aboutDialog.open();
-        //         }
-        //     }
-        // }
+        Menu {
+            title: qsTr("帮助")
+            MenuItem {
+                text: qsTr("关于")
+                onTriggered: {
+                    aboutDialog.open();
+                }
+            }
+        }
     }
 
     FileDialog {
@@ -852,6 +880,15 @@ Window {
                 currentFile = fileSaveDialog.selectedFile;
                 window.title = "MIPS Simulator - " + fileProcess.getFileName(currentFile);
             }
+        }
+    }
+    Dialog {
+        id: aboutDialog
+        title: qsTr("关于")
+        standardButtons: Dialog.Ok
+        anchors.centerIn: parent
+        Label {
+            text: qsTr("MIPS Simulator\n\n2022~2023春夏计原project")
         }
     }
 
