@@ -3,27 +3,27 @@
 #include <QQmlContext>
 #include <QQuickStyle>
 #include <QFont>
-#include "main.h"
 #include "middle/fileprocess.h"
 #include "middle/debug.h"
 #include "middle/codetablemodel.h"
 #include "middle/registertablemodel.h"
 #include "middle/memorytablemodel.h"
 #include "middle/tools.h"
+#include "main.h"
+
+System sys;
 
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
 
     QQmlApplicationEngine engine;
-    System system;
     FileProcess fileProcess;
     Debug debug;
     CodeTableModel codeTableModel;
     RegisterTableModel registerTableModel;
     MemoryTableModel memoryTableModel;
     Tools tools;
-    registerTableModel.initTable(system);
-    engine.rootContext()->setContextProperty("system", QVariant::fromValue(system));
+    registerTableModel.initTable();
     engine.rootContext()->setContextProperty("fileProcess", &fileProcess);
     engine.rootContext()->setContextProperty("debug", &debug);
     engine.rootContext()->setContextProperty("codeTableModel", &codeTableModel);

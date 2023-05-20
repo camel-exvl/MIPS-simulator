@@ -16,6 +16,7 @@ class Tools : public QObject {
    signals:
     void success();
     void successIntCalculate(const int &integer, const QString &text);
+    void successFloatCalculate(const double &number, const QString &floatCode, const QString &doubleCode);
     void successCalculate(const double &result);
     void fail(const QString &err);
 };

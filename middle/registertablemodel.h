@@ -35,10 +35,13 @@ class RegisterTableModel : public QAbstractTableModel {
         return roles;
     }
 
-    void initTable(System &sys);
+    Q_INVOKABLE void initTable();
 
    private:
     QVector<QVector<QString>> table;
+
+   signals:
+    void fail(QString);
 };
 
 #endif  // REGISTERTABLEMODEL_H

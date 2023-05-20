@@ -24,7 +24,25 @@ void Tools::intCalculate(int mode, const QString &text) {
 
 void Tools::floatCalculate(int mode, const QString &text) {
     try {
-        // TODO:
+        if (mode == 0) {
+            double number = text.toDouble();
+            bitset<32> floatCode = turnFloatToComplementcode(number);
+            bitset<64> doubleCode = turnDoubleToComplementcode(number);
+            emit successFloatCalculate(number, QString::fromStdString(floatCode.to_string()),
+                                       QString::fromStdString(doubleCode.to_string()));
+        } else if (mode == 1) {
+            bitset<32> floatCode{text.toStdString()};
+            float number = turnComplementToFloat(floatCode);
+            bitset<64> doubleCode = turnDoubleToComplementcode(number);
+            emit successFloatCalculate(number, text, QString::fromStdString(doubleCode.to_string()));
+        } else if (mode == 2) {
+            bitset<64> doubleCode{text.toStdString()};
+            double number = turnComplementToDouble(doubleCode);
+            bitset<32> floatCode = turnFloatToComplementcode(number);
+            emit successFloatCalculate(number, QString::fromStdString(floatCode.to_string()), text);
+        } else {
+            throw runtime_error{"mode参数错误"};
+        }
     } catch (exception &e) {
         emit fail(QString{e.what()});
     }

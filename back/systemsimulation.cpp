@@ -43,10 +43,10 @@ void System::InitRegister()
 //根据编号找到寄存器并返回寄存器类
 Register& System::FindRegister(int number)
 {
-    //遍历寄存器组
-    for (auto& i : registers)
-        if (i.number == number)
-            return i;
+    if (number < 32 && number >= 0)
+    {
+        return registers.at(number);
+    }
     //若找不到则报错
     cerr << "寄存器不存在" << endl;
     exit(-1);
@@ -110,6 +110,40 @@ bitset<32>& System::AccessMemory(const bitset<32>& address)
     }
 }
 
+const bitset<32>& System::ReadMemory(const bitset<32>& address)
+{
+    //保留区，禁止访问
+    if (address.to_ulong() < 0x00400000)
+    {
+        cerr << "内存保留区域，不允许访问" << endl;
+        exit(-1);
+    }
+    //代码段，返回机器指令
+    else if (address.to_ulong() < 0x10000000)
+    {
+        return mem.text_segment[address.to_ulong()];
+    }
+    else if (address.to_ulong() < 0x7fffffff)
+    {
+        //数据段，返回存储数据
+        if (address.to_ulong() <  registers.at(29).value.to_ulong())
+        {
+            return mem.data_segment[address.to_ulong()];
+        }
+        //堆栈段，返回堆栈数据
+        else
+        {
+            return mem.stack_segment[address.to_ulong()];
+        }
+    }
+    //地址越界报错
+    else
+    {
+        cerr << "错误的内存地址，超出内存大小" << endl;
+        exit(-1);
+    }
+}
+
 //向内存代码段添加机器指令
 void System::PushCodeToMemory(const bitset<32>& code)
 {
@@ -156,14 +190,32 @@ void System::RemoveBreakPoint(const std::bitset<32> address)
 //执行内存中的指令至断点
 bitset<32> System::BreakPointExecute()
 {
+    if (OneStepExecute() == mem.texttop)
+    {
+        cerr << "已执行完所有指令" << endl;
+        return PC.Getvalue();
+    }
     //若当前指令不是断点就继续执行
     while (breakpoints[PC.Getvalue().to_ulong()] == false)
     {
-        OneStepExecute();
+        if (OneStepExecute() == mem.texttop)
+        {
+            cerr << "已执行完所有指令" << endl;
+            return PC.Getvalue();
+        }
     }
     return PC.Getvalue();
 }
 
+//重新调试
+void System::Reset()
+{
+    System s;
+    this->mem = s.mem;
+    this->registers = s.registers;
+    this->PC = s.PC;
+    this->breakpoints = s.breakpoints;
+}
 
 //R型指令
 void System::InstructionRType(const string machineCode)
@@ -302,7 +354,11 @@ void System::Sw(int rs, int rt, int offset)//sw rt rs offset rt存到rs+offset:�
 {
     int address=FindRegister(rs).Getvalue().to_ulong()+offset;
     bitset<32> addr(address);
-    AccessMemory(addr)=FindRegister(rt).Getvalue();
+    if (addr.to_ulong() > mem.datatop.to_ulong())
+    {
+        mem.datatop = bitset<32>{ address + 4 };
+    }
+    AccessMemory(addr) = FindRegister(rt).Getvalue();
     PcAutoAdd();
 }
 void System::Beq(int rs, int rt, int offset)//beq rt rs offset 如果rt值=rs值，跳转到PC+offset

@@ -4,6 +4,7 @@
 #include <QAbstractTableModel>
 #include <QFile>
 #include <QUrl>
+#include <bitset>
 #include "main.h"
 #include "back/disassembler.h"
 
@@ -50,14 +51,17 @@ class CodeTableModel : public QAbstractTableModel {
         return roles;
     }
 
-    Q_INVOKABLE void initTableFromBinFile(System sys, const QString &fileName);
+    Q_INVOKABLE void initTableFromBinFile(const QString &fileName);
     Q_INVOKABLE void setBreakpoint(int row, bool value);
+    Q_INVOKABLE void executeToNextBreakpoint();
+    Q_INVOKABLE void executeOneStep();
 
    private:
     QVector<bool> breakpoint;
     QVector<QVector<Property>> table;
    signals:
     void success();
+    void successExecute(const int &PC);
     void fail(const QString &err);
 };
 

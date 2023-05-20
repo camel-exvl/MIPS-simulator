@@ -11,7 +11,7 @@ class Debug : public QObject {
     Q_OBJECT
    public:
     explicit Debug(QObject *parent = nullptr);
-    Q_INVOKABLE void assemble(System sys, const QString &text, const QString &fileName);
+    Q_INVOKABLE void assemble(const QString &text, const QString &fileName);
    signals:
     void success();
     void fail(const QString &err);

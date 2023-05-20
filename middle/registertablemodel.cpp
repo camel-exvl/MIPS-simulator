@@ -2,7 +2,9 @@
 
 using namespace std;
 
-void RegisterTableModel::initTable(System &sys) {
+extern System sys;
+
+void RegisterTableModel::initTable() {
     beginResetModel();
     try {
         table.clear();
@@ -15,7 +17,7 @@ void RegisterTableModel::initTable(System &sys) {
                           QString::fromStdString("0x" + ss.str())});
         }
     } catch (exception &e) {
-        cerr << e.what() << endl;
+        emit fail(QString{e.what()});
     }
     endResetModel();
 }

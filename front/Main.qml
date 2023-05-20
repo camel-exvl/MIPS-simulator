@@ -21,7 +21,7 @@ Window {
     }
 
     property url currentFile: ""
-    property int currentLine: -1
+    property int currentLine: 1
 
     MessagePopup {
         id: message
@@ -130,6 +130,12 @@ Window {
                             roleValue: CodeTableModel.Boolean
                             delegate: CheckBox {
                                 onClicked: codeTableModel.setBreakpoint(row, checked)
+                                Connections {
+                                    target: codeTableModel
+                                    function onFail(err) {
+                                        message.show(err, "red", 5000);
+                                    }
+                                }
                             }
                         }
                         DelegateChoice {
@@ -197,7 +203,7 @@ Window {
                     columnWidthProvider: function (column) {
                         switch (column) {
                         case 0:
-                            return dp(200);
+                            return dp(250);
                         case 1:
                         case 2:
                         case 3:
@@ -219,6 +225,34 @@ Window {
                             horizontalAlignment: Text.AlignLeft
                             width: parent.width
                         }
+                    }
+                }
+            }
+            Rectangle {
+                id: memorySelectorRec
+                height: parent.height / 3
+                width: parent.width / 5
+                border.color: "lightgrey"
+
+                Label {
+                    id: memorySelectorLabel
+                    text: qsTr("内存地址：")
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.margins: dp(20)
+                    font.pixelSize: dp(30)
+                }
+                ComboBox {
+                    id: memorySelector
+                    anchors.top: memorySelectorLabel.bottom
+                    anchors.left: parent.left
+                    anchors.margins: dp(20)
+                    model: ["堆栈段(0x7ffffedc)", "数据段(0x10000000)", "代码段(0x00400000)"]
+                    currentIndex: 0
+                    width: dp(400)
+                    font.pixelSize: dp(30)
+                    onCurrentIndexChanged: {
+                        memoryTableModel.setDisplayMemory(memorySelector.currentIndex);
                     }
                 }
             }
@@ -315,8 +349,9 @@ Window {
                             border.color: "grey"
                             height: intInteger.contentHeight + dp(20)
                             width: intInteger.contentWidth < dp(200) ? dp(200) : intInteger.contentWidth + dp(20)
-                            Text {
+                            TextInput {
                                 id: intInteger
+                                readOnly: true
                                 anchors.fill: parent
                                 anchors.margins: dp(10)
                                 font.pixelSize: dp(30)
@@ -338,8 +373,9 @@ Window {
                             border.color: "grey"
                             height: intComplete.contentHeight + dp(20)
                             width: intComplete.contentWidth < dp(200) ? dp(200) : intComplete.contentWidth + dp(20)
-                            Text {
+                            TextInput {
                                 id: intComplete
+                                readOnly: true
                                 anchors.fill: parent
                                 anchors.margins: dp(10)
                                 font.pixelSize: dp(30)
@@ -408,6 +444,18 @@ Window {
                                     message.show("请输入数据", "red", 5000);
                                     return;
                                 }
+                                tools.floatCalculate(floatCombo.currentIndex, input);
+                            }
+                            Connections {
+                                target: tools
+                                function onSuccessFloatCalculate(number, floatCode, doubleCode) {
+                                    floatNumber.text = number;
+                                    floatFloat.text = floatCode;
+                                    floatDouble.text = doubleCode;
+                                }
+                                function onFail(err) {
+                                    message.show(err, "red", 5000);
+                                }
                             }
                         }
                     }
@@ -415,19 +463,20 @@ Window {
                         id: floatNumberRow
                         spacing: dp(10)
                         Label {
-                            id: floatIntegerLabel
+                            id: floatNumberLabel
                             text: qsTr("浮点数：")
                             anchors.verticalCenter: parent.verticalCenter
                             font.pixelSize: dp(30)
-                            height: floatIntegerRec.height
+                            height: floatNumberRec.height
                         }
                         Rectangle {
-                            id: floatIntegerRec
+                            id: floatNumberRec
                             border.color: "grey"
-                            height: floatInteger.contentHeight + dp(20)
-                            width: floatInteger.contentWidth < dp(200) ? dp(200) : floatInteger.contentWidth + dp(20)
-                            Text {
-                                id: floatInteger
+                            height: floatNumber.contentHeight + dp(20)
+                            width: floatNumber.contentWidth < dp(200) ? dp(200) : floatNumber.contentWidth + dp(20)
+                            TextInput {
+                                id: floatNumber
+                                readOnly: true
                                 anchors.fill: parent
                                 anchors.margins: dp(10)
                                 font.pixelSize: dp(30)
@@ -449,8 +498,9 @@ Window {
                             border.color: "grey"
                             height: floatFloat.contentHeight + dp(20)
                             width: floatFloat.contentWidth < dp(200) ? dp(200) : floatFloat.contentWidth + dp(20)
-                            Text {
+                            TextInput {
                                 id: floatFloat
+                                readOnly: true
                                 anchors.fill: parent
                                 anchors.margins: dp(10)
                                 font.pixelSize: dp(30)
@@ -472,8 +522,9 @@ Window {
                             border.color: "grey"
                             height: floatDouble.contentHeight + dp(20)
                             width: floatDouble.contentWidth < dp(200) ? dp(200) : floatDouble.contentWidth + dp(20)
-                            Text {
+                            TextInput {
                                 id: floatDouble
+                                readOnly: true
                                 anchors.fill: parent
                                 anchors.margins: dp(10)
                                 font.pixelSize: dp(30)
@@ -541,6 +592,9 @@ Window {
                                 function onSuccessCalculate(result) {
                                     calResult.text = result;
                                 }
+                                function onFail(err) {
+                                    message.show(err, "red", 5000);
+                                }
                             }
                         }
                     }
@@ -559,8 +613,9 @@ Window {
                             border.color: "grey"
                             height: calResult.contentHeight + dp(20)
                             width: calResult.contentWidth < dp(200) ? dp(200) : calResult.contentWidth + dp(20)
-                            Text {
+                            TextInput {
                                 id: calResult
+                                readOnly: true
                                 anchors.fill: parent
                                 anchors.margins: dp(10)
                                 font.pixelSize: dp(30)
@@ -652,7 +707,7 @@ Window {
                         message.show(qsTr("请先保存文件"), "red", 5000);
                         return;
                     }
-                    debug.assemble(system, edit.text, currentFile);
+                    debug.assemble(edit.text, currentFile);
                 }
                 Connections {
                     target: debug
@@ -671,12 +726,13 @@ Window {
                         message.show(qsTr("请先保存/编译文件"), "red", 5000);
                         return;
                     }
-                    codeTableModel.initTableFromBinFile(system, String(currentFile).replace(".asm", ".bin"));
+                    codeTableModel.initTableFromBinFile(String(currentFile).replace(".asm", ".bin"));
                 }
                 Connections {
                     target: codeTableModel
                     function onSuccess() {
-                        memoryTableModel.initTable(system);
+                        memoryTableModel.initTable();
+                        currentLine = 1;
                         tabBar.currentIndex = 1;
                         stackLayout.currentIndex = 1;
                     }
@@ -688,11 +744,67 @@ Window {
             MenuItem {
                 text: qsTr("运行")
                 onTriggered: {
+                    if (currentFile === "") {
+                        message.show(qsTr("请先保存/编译文件"), "red", 5000);
+                        return;
+                    }
+                    codeTableModel.executeToNextBreakpoint();
+                    registerTableModel.initTable();
+                    memoryTableModel.initTable();
+                }
+                Connections {
+                    target: codeTableModel
+                    function onSuccessExecute(PC) {
+                        currentLine = PC;
+                    }
+                    function onFail(err) {
+                        message.show(err, "red", 5000);
+                    }
+                }
+                Connections {
+                    target: registerTableModel
+                    function onFail(err) {
+                        message.show(err, "red", 5000);
+                    }
+                }
+                Connections {
+                    target: memoryTableModel
+                    function onFail(err) {
+                        message.show(err, "red", 5000);
+                    }
                 }
             }
             MenuItem {
                 text: qsTr("单步")
                 onTriggered: {
+                    if (currentFile === "") {
+                        message.show(qsTr("请先保存/编译文件"), "red", 5000);
+                        return;
+                    }
+                    codeTableModel.executeOneStep();
+                    registerTableModel.initTable();
+                    memoryTableModel.initTable();
+                }
+                Connections {
+                    target: codeTableModel
+                    function onSuccessExecute(PC) {
+                        currentLine = PC;
+                    }
+                    function onFail(err) {
+                        message.show(err, "red", 5000);
+                    }
+                }
+                Connections {
+                    target: registerTableModel
+                    function onFail(err) {
+                        message.show(err, "red", 5000);
+                    }
+                }
+                Connections {
+                    target: memoryTableModel
+                    function onFail(err) {
+                        message.show(err, "red", 5000);
+                    }
                 }
             }
         }
@@ -718,9 +830,9 @@ Window {
             if (suffix === "asm") {
                 fileProcess.openFile(selectedFile);
             } else if (suffix === "bin") {
-                codeTableModel.initTableFromBinFile(system, currentFile);
+                codeTableModel.initTableFromBinFile(currentFile);
             } else {
-                message.show("不支持的文件格式");
+                message.show("不支持的文件格式", "red", 5000);
             }
         }
         Connections {
@@ -768,6 +880,15 @@ Window {
                 currentFile = fileSaveDialog.selectedFile;
                 window.title = "MIPS Simulator - " + fileProcess.getFileName(currentFile);
             }
+        }
+    }
+    Dialog {
+        id: aboutDialog
+        title: qsTr("关于")
+        standardButtons: Dialog.Ok
+        anchors.centerIn: parent
+        Label {
+            text: qsTr("MIPS Simulator\n\n2022~2023春夏计原project")
         }
     }
 
