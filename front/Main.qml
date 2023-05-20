@@ -247,7 +247,7 @@ Window {
                     anchors.top: memorySelectorLabel.bottom
                     anchors.left: parent.left
                     anchors.margins: dp(20)
-                    model: ["堆栈段(0x7ffffedc)", "数据段(0x10000000)", "代码段(0x00400000)"]
+                    model: ["堆栈段(0x7ffffee0)", "数据段(0x10000000)", "代码段(0x00400000)"]
                     currentIndex: 0
                     width: dp(400)
                     font.pixelSize: dp(30)

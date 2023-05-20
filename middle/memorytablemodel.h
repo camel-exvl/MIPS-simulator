@@ -42,7 +42,7 @@ class MemoryTableModel : public QAbstractTableModel {
 
    private:
     QVector<QVector<QString>> table;
-    unsigned int addr = 0x7ffffedc;
+    unsigned int addr = 0x7ffffee0;
    signals:
     void fail(QString);
 };

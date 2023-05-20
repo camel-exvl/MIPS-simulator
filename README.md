@@ -14,7 +14,7 @@
 
 - disassembler.cpp: MIPS反汇编器相关功能实现
 
-打包方式
+打包方式	切记使用Qt 6.5.0 (MinGW 11.2.0 64-bit)的shell打开
 
 ```
 windeployqt --qmldir "QML路径" "文件路径" --no-translations

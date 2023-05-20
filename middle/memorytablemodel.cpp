@@ -31,7 +31,7 @@ void MemoryTableModel::initTable() {
 void MemoryTableModel::setDisplayMemory(int id) {
     switch (id) {
         case 0:
-            addr = 0x7ffffedc;
+            addr = 0x7ffffee0;
             break;
         case 1:
             addr = 0x10000000;
