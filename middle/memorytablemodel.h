@@ -38,9 +38,11 @@ class MemoryTableModel : public QAbstractTableModel {
     }
 
     Q_INVOKABLE void initTable();
+    Q_INVOKABLE void setDisplayMemory(int id);
 
    private:
     QVector<QVector<QString>> table;
+    unsigned int addr = 0x7ffffedc;
    signals:
     void fail(QString);
 };

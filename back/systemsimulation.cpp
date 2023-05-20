@@ -474,19 +474,16 @@ std::vector<std::string> toRPN(std::string s) {
     std::stack<char> stack;
     std::vector<std::string> rpn;
     std::string number;
+    bool lastWasOperator = true;
 
-    if (s[0] == '-') {
-        number += s[0];
-    }
-
-    for (int i = (s[0] == '-') ? 1 : 0; i < s.size(); ++i) {
+    for (int i = 0; i < s.size(); ++i) {
         if (isdigit(s[i]) || s[i] == '.') {
             number += s[i];
+            lastWasOperator = false;
+        } else if (s[i] == '-' && lastWasOperator) {
+            number += s[i];
+            lastWasOperator = false;
         } else {
-            if (s[i] == '-' && s[i - 1] != ')' && !isdigit(s[i - 1])) {
-                number += s[i];
-                continue;
-            }
             if (!number.empty()) {
                 rpn.push_back(number);
                 number = "";
@@ -496,6 +493,7 @@ std::vector<std::string> toRPN(std::string s) {
                 stack.pop();
             }
             stack.push(s[i]);
+            lastWasOperator = true;
         }
     }
     if (!number.empty()) {
@@ -511,7 +509,7 @@ std::vector<std::string> toRPN(std::string s) {
 double calculateRPN(std::vector<std::string> rpn) {
     std::stack<double> stack;
     for (const auto &s : rpn) {
-        if (isdigit(s[0]) || s[0] == '-' || s.size() > 1) {
+        if (isdigit(s[0]) || (s.size() > 1 && (isdigit(s[1]) || s[1] == '.'))) {
             stack.push(stod(s));
         } else {
             double right = stack.top();

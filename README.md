@@ -13,3 +13,10 @@
 - disassembler.h: MIPS反汇编器相关功能声明
 
 - disassembler.cpp: MIPS反汇编器相关功能实现
+
+打包方式
+
+```
+windeployqt --qmldir "QML路径" "文件路径" --no-translations
+```
+

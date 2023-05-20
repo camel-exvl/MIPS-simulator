@@ -56,7 +56,6 @@ void CodeTableModel::setBreakpoint(int row, bool value) {
         } else {
             sys.RemoveBreakPoint(address);
         }
-        emit success();
     } catch (std::exception &e) {
         emit fail(QString{e.what()});
     }

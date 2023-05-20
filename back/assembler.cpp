@@ -11,7 +11,7 @@ unsigned int Count = 0;
 string allinstructions[] = {"add", "addi", "sub",
                             "and", "or", "sll",
                             "j", "jr", "lw",
-                            "sw", "beq"};
+                            "sw", "beq", "jal"};
 
 vector<Instruction> instructions;
 vector<pair<bitset<32>, string>> Lables;//标签库，存储标签的地址及字符串
@@ -37,6 +37,8 @@ static void Lw(vector<string> code, unsigned int i, System& sys);
 static void Sw(vector<string> code, unsigned int i, System& sys);
 
 static void Beq(vector<string> code, unsigned int i, System& sys);
+
+static void Jal(vector<string> code, unsigned int i, System& sys);
 
 // int main() {
 //     InitRegister();// 初始化寄存器
@@ -187,6 +189,10 @@ void Compilation(System& sys) {
         }
         if (instructions.at(i).assemblecode.at(0) == "beq") {
             Beq(instructions.at(i).assemblecode, i, sys);
+            continue;
+        }
+        if (instructions.at(i).assemblecode.at(0) == "jal") {
+            Jal(instructions.at(i).assemblecode, i, sys);
             continue;
         }
     }
@@ -352,6 +358,18 @@ static void Beq(vector<string> code, unsigned int i, System& sys) {
         bitset<32> result(decimal);// 二进制的机器码
         instructions.at(i).machinecode = bitset<32>(result);
     }
+}
+
+static void Jal(vector<string> code, unsigned int i, System& sys){
+    bitset<32> address = FindAddressByName(code.at(1));// 二进制的标签地址
+    // 如果指令后的地址是用标签表示的,address不会为null
+    if (address == NULL) {// 十进制地址值跳转
+        address = bitset<32>(stoi(code.at(1)));
+    }
+    address = address >> 2;// 右移两位
+    int result = address.to_ulong();
+    result = result + 201326592;
+    instructions.at(i).machinecode = bitset<32>(result);
 }
 
 void PrintBinaryAddress() {
